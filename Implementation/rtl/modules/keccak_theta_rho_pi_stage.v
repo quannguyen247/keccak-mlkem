@@ -44,7 +44,7 @@ module keccak_theta_rho_pi_stage (
         // Rho step
         // Tinh A''[x,y] = ROT(A'[x,y], r[x,y])
         for (i = 0; i < 25; i = i + 1) begin
-            A[i] = rotl64(A[i], rho_offset(i));
+            A[i] = rotl64(A[i], rho_offset(i[4:0]));
         end
 
         // Pi step
