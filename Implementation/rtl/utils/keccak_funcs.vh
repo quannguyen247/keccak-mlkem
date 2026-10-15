@@ -79,6 +79,7 @@ function [63:0] round_constant;
     end
 endfunction
 
+// Keccak mode parameters
 function [7:0] keccak_rate_bytes;
     input [`KECCAK_MODE_WIDTH-1:0] mode;
     begin
@@ -96,10 +97,8 @@ function [7:0] keccak_suffix;
     input [`KECCAK_MODE_WIDTH-1:0] mode;
     begin
         case (mode)
-            `KECCAK_MODE_SHAKE128,
-            `KECCAK_MODE_SHAKE256: keccak_suffix = `KECCAK_SUFFIX_SHAKE;
-            `KECCAK_MODE_SHA3_256,
-            `KECCAK_MODE_SHA3_512: keccak_suffix = `KECCAK_SUFFIX_SHA3;
+            `KECCAK_MODE_SHAKE128, `KECCAK_MODE_SHAKE256: keccak_suffix = `KECCAK_SUFFIX_SHAKE;
+            `KECCAK_MODE_SHA3_256, `KECCAK_MODE_SHA3_512: keccak_suffix = `KECCAK_SUFFIX_SHA3;
             default: keccak_suffix = `KECCAK_SUFFIX_SHAKE;
         endcase
     end
@@ -120,8 +119,5 @@ endfunction
 
 function keccak_is_xof;
     input [`KECCAK_MODE_WIDTH-1:0] mode;
-    begin
-        keccak_is_xof = (mode == `KECCAK_MODE_SHAKE128) ||
-                        (mode == `KECCAK_MODE_SHAKE256);
-    end
+    keccak_is_xof = (mode == `KECCAK_MODE_SHAKE128) || (mode == `KECCAK_MODE_SHAKE256);
 endfunction
