@@ -2,8 +2,7 @@
 `include "keccak_defs.vh"
 
 module keccak_sponge #(
-    parameter BLOCK_WIDTH = 32,
-    parameter USE_ABSORB_LAST = 0
+    parameter BLOCK_WIDTH = 32
 )(
     input wire clk,
     input wire rst_n,
@@ -14,20 +13,19 @@ module keccak_sponge #(
     // Absorb control
     input wire absorb_valid,
     input wire absorb_last,
-    input wire [`KECCAK_MAX_RATE_BITS-1:0] absorb_in,
+    input wire [`KECCAK_RATE_BITS-1:0] absorb_in,
     output wire absorb_ready,
 
     // Squeeze control
     input wire squeeze_ready,
     input wire squeeze_last,
     output wire squeeze_valid,
-    output wire [`KECCAK_MAX_RATE_BITS-1:0] squeeze_out,
+    output wire [`KECCAK_RATE_BITS-1:0] squeeze_out,
     output wire [7:0] squeeze_bytes,
 
     // Global control
     input wire start,
     output wire done,
-    input wire [BLOCK_WIDTH-1:0] input_blocks,
     input wire [BLOCK_WIDTH-1:0] output_blocks
 );
 
@@ -43,11 +41,11 @@ module keccak_sponge #(
     reg [5:0] curr_state, next_state;
     reg [`KECCAK_MODE_WIDTH-1:0] mode_r;
     reg [`KECCAK_STATE_WIDTH-1:0] keccak_state;
-    reg [BLOCK_WIDTH-1:0] absorb_cnt, squeeze_cnt;
+    reg [BLOCK_WIDTH-1:0] squeeze_cnt;
     reg xof_stream_r;
     reg absorb_last_r;
     reg [7:0] squeeze_bytes_r;
-    reg [`KECCAK_MAX_RATE_BITS-1:0] squeeze_data;
+    reg [`KECCAK_RATE_BITS-1:0] squeeze_data;
 
     wire perm_start;
     wire perm_done;
@@ -73,7 +71,7 @@ module keccak_sponge #(
             ST_START: next_state = ST_PERMUTE;
             ST_PERMUTE: begin
                 if (perm_done) begin
-                    if ((USE_ABSORB_LAST && !absorb_last_r) || (!USE_ABSORB_LAST && absorb_cnt > 0))
+                    if (!absorb_last_r)
                         next_state = ST_ABSORB;
                     else if (xof_stream_r || squeeze_cnt > 0)
                         next_state = ST_SQUEEZE;
@@ -95,7 +93,7 @@ module keccak_sponge #(
     end
 
     always @(*) begin
-        squeeze_data = {`KECCAK_MAX_RATE_BITS{1'b0}};
+        squeeze_data = {`KECCAK_RATE_BITS{1'b0}};
 
         case (mode_r)
             `KECCAK_MODE_SHAKE128: begin
@@ -105,10 +103,10 @@ module keccak_sponge #(
                 squeeze_data[`SHAKE256_RATE_BITS-1:0] = keccak_state[`SHAKE256_RATE_BITS-1:0];
             end
             `KECCAK_MODE_SHA3_256: begin
-                squeeze_data[(`SHA3_256_DIGEST_BYTES * 8)-1:0] = keccak_state[(`SHA3_256_DIGEST_BYTES * 8)-1:0];
+                squeeze_data[(`SHA3_256_DIGEST * 8)-1:0] = keccak_state[(`SHA3_256_DIGEST * 8)-1:0];
             end
             `KECCAK_MODE_SHA3_512: begin
-                squeeze_data[(`SHA3_512_DIGEST_BYTES * 8)-1:0] = keccak_state[(`SHA3_512_DIGEST_BYTES * 8)-1:0];
+                squeeze_data[(`SHA3_512_DIGEST * 8)-1:0] = keccak_state[(`SHA3_512_DIGEST * 8)-1:0];
             end
             default: begin
                 squeeze_data[`SHAKE256_RATE_BITS-1:0] = keccak_state[`SHAKE256_RATE_BITS-1:0];
@@ -120,11 +118,6 @@ module keccak_sponge #(
         if (!rst_n) begin
             mode_r <= `KECCAK_MODE_SHAKE256;
             keccak_state <= {`KECCAK_STATE_WIDTH{1'b0}};
-            absorb_cnt <= 0;
-            squeeze_cnt <= 0;
-            xof_stream_r <= 1'b0;
-            absorb_last_r <= 1'b0;
-            squeeze_bytes_r <= `SHAKE256_RATE_BYTES;
             curr_state <= ST_IDLE;
         end else begin
             curr_state <= next_state;
@@ -133,7 +126,6 @@ module keccak_sponge #(
                     if (start) begin
                         mode_r <= mode;
                         keccak_state <= {`KECCAK_STATE_WIDTH{1'b0}};
-                        absorb_cnt <= input_blocks;
                         squeeze_cnt <= keccak_is_xof(mode) ? output_blocks : 1;
                         xof_stream_r <= keccak_is_xof(mode) && (output_blocks == 0);
                         absorb_last_r <= 1'b0;
@@ -157,9 +149,6 @@ module keccak_sponge #(
                                 keccak_state[`SHAKE256_RATE_BITS-1:0] <= keccak_state[`SHAKE256_RATE_BITS-1:0] ^ absorb_in[`SHAKE256_RATE_BITS-1:0];
                             end
                         endcase
-
-                        if (!USE_ABSORB_LAST && absorb_cnt > 0)
-                            absorb_cnt <= absorb_cnt - 1'b1;
                     end
                 end
                 ST_PERMUTE: begin
