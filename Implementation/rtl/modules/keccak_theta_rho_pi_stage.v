@@ -8,8 +8,8 @@ module keccak_theta_rho_pi_stage (
 
     `include "keccak_funcs.vh"
 
-    reg [63:0] A [0:24]; 
-    reg [63:0] B [0:24]; 
+    reg [63:0] A [0:`KECCAK_NUM_LANES-1]; 
+    reg [63:0] B [0:`KECCAK_NUM_LANES-1]; 
     reg [63:0] C [0:4]; 
     reg [63:0] D [0:4];
     integer x, y, i;
@@ -18,7 +18,7 @@ module keccak_theta_rho_pi_stage (
         state_out = {`KECCAK_STATE_WIDTH{1'b0}};
 
         // Nap lane cho A va set gia tri cho B
-        for (i = 0; i < 25; i = i + 1) begin
+        for (i = 0; i < `KECCAK_NUM_LANES; i = i + 1) begin
             A[i] = state_in[(i * 64) +: 64];
             B[i] = 64'h0;
         end
@@ -43,7 +43,7 @@ module keccak_theta_rho_pi_stage (
 
         // Rho step
         // Tinh A''[x,y] = ROT(A'[x,y], r[x,y])
-        for (i = 0; i < 25; i = i + 1) begin
+        for (i = 0; i < `KECCAK_NUM_LANES; i = i + 1) begin
             A[i] = rotl64(A[i], rho_offset(i[4:0]));
         end
 
@@ -56,7 +56,7 @@ module keccak_theta_rho_pi_stage (
             end
         end
 
-        for (i = 0; i < 25; i = i + 1) begin
+        for (i = 0; i < `KECCAK_NUM_LANES; i = i + 1) begin
             state_out[(i * 64) +: 64] = B[i];
         end
     end

@@ -7,14 +7,14 @@ module keccak_chi_iota_stage(
     output reg [`KECCAK_STATE_WIDTH-1:0] state_out
 );
 
-    reg [63:0] A [0:24]; 
-    reg [63:0] B [0:24]; 
+    reg [63:0] A [0:`KECCAK_NUM_LANES-1]; 
+    reg [63:0] B [0:`KECCAK_NUM_LANES-1]; 
     integer x, y, i;
 
     always @(*) begin
         state_out = {`KECCAK_STATE_WIDTH{1'b0}};
 
-        for (i = 0; i < 25; i = i + 1) begin
+        for (i = 0; i < `KECCAK_NUM_LANES; i = i + 1) begin
             B[i] = state_in[(i * 64) +: 64];
             A[i] = 64'h0;
         end
@@ -29,7 +29,7 @@ module keccak_chi_iota_stage(
         // Iota step: A''''[0,0] = A'''[0,0] ^ RC[r]
         A[0] = A[0] ^ round_const;
 
-        for (i = 0; i < 25; i = i + 1) begin
+        for (i = 0; i < `KECCAK_NUM_LANES; i = i + 1) begin
             state_out[(i * 64) +: 64] = A[i];
         end
     end

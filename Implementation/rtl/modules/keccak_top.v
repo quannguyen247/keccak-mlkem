@@ -6,12 +6,12 @@ module keccak_top (
     input wire rst_n,
     input wire [`KECCAK_MODE_WIDTH-1:0] mode,
     input wire absorb_valid,
-    input wire [`KECCAK_MAX_RATE_BITS-1:0] msg_block_in,
+    input wire [`KECCAK_RATE_BITS-1:0] msg_block_in,
     input wire [7:0] msg_len_bytes,
     output wire absorb_ready,
     input wire squeeze_ready,
     output wire squeeze_valid,
-    output wire [`KECCAK_MAX_RATE_BITS-1:0] squeeze_out,
+    output wire [`KECCAK_RATE_BITS-1:0] squeeze_out,
     output wire [7:0] squeeze_bytes,
     input wire start,
     output wire done,
@@ -19,15 +19,15 @@ module keccak_top (
     input wire [31:0] output_blocks
 );
 
-    wire [`KECCAK_MAX_RATE_BITS-1:0] padded_block0;
-    wire [`KECCAK_MAX_RATE_BITS-1:0] padded_block1_unused;
+    wire [`KECCAK_RATE_BITS-1:0] padded_block0;
+    wire [`KECCAK_RATE_BITS-1:0] padded_block1_unused;
     wire need_block2_unused;
     wire sponge_absorb_ready;
     reg [`KECCAK_MODE_WIDTH-1:0] mode_r;
-    reg [`KECCAK_MAX_RATE_BITS-1:0] msg_block_r;
+    reg [`KECCAK_RATE_BITS-1:0] msg_block_r;
     reg [7:0] msg_len_bytes_r;
     reg block_valid_r;
-    reg [`KECCAK_MAX_RATE_BITS-1:0] padded_block_r;
+    reg [`KECCAK_RATE_BITS-1:0] padded_block_r;
     reg padded_valid_r;
 
     keccak_pad_block u_pad (
