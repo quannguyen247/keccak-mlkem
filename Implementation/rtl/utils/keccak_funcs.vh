@@ -79,49 +79,51 @@ function [63:0] round_constant;
     end
 endfunction
 
+// Block rate for each mode
 function [7:0] keccak_rate_bytes;
     input [`KECCAK_MODE_WIDTH-1:0] mode;
+    localparam integer SHAKE128_BYTES = `SHAKE128_RATE_BITS / 8;
+    localparam integer SHAKE256_BYTES = `SHAKE256_RATE_BITS / 8;
+    localparam integer SHA3_256_BYTES = `SHA3_256_RATE_BITS / 8;
+    localparam integer SHA3_512_BYTES = `SHA3_512_RATE_BITS / 8;
     begin
         case (mode)
-            `KECCAK_MODE_SHAKE128: keccak_rate_bytes = `SHAKE128_RATE_BYTES;
-            `KECCAK_MODE_SHAKE256: keccak_rate_bytes = `SHAKE256_RATE_BYTES;
-            `KECCAK_MODE_SHA3_256: keccak_rate_bytes = `SHA3_256_RATE_BYTES;
-            `KECCAK_MODE_SHA3_512: keccak_rate_bytes = `SHA3_512_RATE_BYTES;
-            default: keccak_rate_bytes = `SHAKE256_RATE_BYTES;
+            `KECCAK_MODE_SHAKE128: keccak_rate_bytes = SHAKE128_BYTES[7:0];
+            `KECCAK_MODE_SHAKE256: keccak_rate_bytes = SHAKE256_BYTES[7:0];
+            `KECCAK_MODE_SHA3_256: keccak_rate_bytes = SHA3_256_BYTES[7:0];
+            `KECCAK_MODE_SHA3_512: keccak_rate_bytes = SHA3_512_BYTES[7:0];
+            default: keccak_rate_bytes = SHAKE256_BYTES[7:0];
         endcase
     end
 endfunction
 
+// Padding suffix
 function [7:0] keccak_suffix;
     input [`KECCAK_MODE_WIDTH-1:0] mode;
     begin
         case (mode)
-            `KECCAK_MODE_SHAKE128,
-            `KECCAK_MODE_SHAKE256: keccak_suffix = `KECCAK_SUFFIX_SHAKE;
-            `KECCAK_MODE_SHA3_256,
-            `KECCAK_MODE_SHA3_512: keccak_suffix = `KECCAK_SUFFIX_SHA3;
+            `KECCAK_MODE_SHAKE128, `KECCAK_MODE_SHAKE256: keccak_suffix = `KECCAK_SUFFIX_SHAKE;
+            `KECCAK_MODE_SHA3_256, `KECCAK_MODE_SHA3_512: keccak_suffix = `KECCAK_SUFFIX_SHA3;
             default: keccak_suffix = `KECCAK_SUFFIX_SHAKE;
         endcase
     end
 endfunction
 
+// Default output length
 function [7:0] keccak_output_bytes;
     input [`KECCAK_MODE_WIDTH-1:0] mode;
     begin
         case (mode)
-            `KECCAK_MODE_SHAKE128: keccak_output_bytes = `SHAKE128_RATE_BYTES;
-            `KECCAK_MODE_SHAKE256: keccak_output_bytes = `SHAKE256_RATE_BYTES;
-            `KECCAK_MODE_SHA3_256: keccak_output_bytes = `SHA3_256_DIGEST_BYTES;
-            `KECCAK_MODE_SHA3_512: keccak_output_bytes = `SHA3_512_DIGEST_BYTES;
-            default: keccak_output_bytes = `SHAKE256_RATE_BYTES;
+            `KECCAK_MODE_SHAKE128, `KECCAK_MODE_SHAKE256: keccak_output_bytes = keccak_rate_bytes(mode);
+            `KECCAK_MODE_SHA3_256: keccak_output_bytes = `SHA3_256_DIGEST;
+            `KECCAK_MODE_SHA3_512: keccak_output_bytes = `SHA3_512_DIGEST;
+            default: keccak_output_bytes = keccak_rate_bytes(`KECCAK_MODE_SHAKE256);
         endcase
     end
 endfunction
 
+// Check XOF
 function keccak_is_xof;
     input [`KECCAK_MODE_WIDTH-1:0] mode;
-    begin
-        keccak_is_xof = (mode == `KECCAK_MODE_SHAKE128) ||
-                        (mode == `KECCAK_MODE_SHAKE256);
-    end
+    keccak_is_xof = (mode == `KECCAK_MODE_SHAKE128) || (mode == `KECCAK_MODE_SHAKE256);
 endfunction
