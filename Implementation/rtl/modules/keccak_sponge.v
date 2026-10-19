@@ -159,10 +159,6 @@ module keccak_sponge #(
                     if (squeeze_ready && !xof_stream_r && squeeze_cnt > 0)
                         squeeze_cnt <= squeeze_cnt - 1'b1;
                 end
-                ST_START: begin
-                end
-                ST_DONE: begin
-                end
             endcase
         end
     end
