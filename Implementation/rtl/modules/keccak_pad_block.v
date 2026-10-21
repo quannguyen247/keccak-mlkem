@@ -13,42 +13,35 @@ module keccak_pad_block(
     `include "keccak_funcs.vh"
 
     reg [7:0] rate_bytes;
-    reg [7:0] valid_bytes;
     reg [7:0] suffix;
     integer i;
 
     always @(*) begin
         pad_block0_out = {`KECCAK_RATE_BITS{1'b0}};
         pad_block1_out = {`KECCAK_RATE_BITS{1'b0}};
-        need_block2 = 1'b0;
-
         rate_bytes = keccak_rate_bytes(mode);
         suffix = keccak_suffix(mode);
+        need_block2 = (msg_len_bytes >= rate_bytes);
 
-        // Clamp valid bytes to rate
-        if (msg_len_bytes > rate_bytes) begin
-            valid_bytes = rate_bytes;
-        end else begin
-            valid_bytes = msg_len_bytes;
-        end
-
-        // Copy valid bytes to block 0
+        // Copy valid message bytes and append domain suffix
         for (i = 0; i < (`KECCAK_RATE_BITS / 8); i = i + 1) begin
-            if (i < valid_bytes) begin
-                pad_block0_out[(8 * i) +: 8] = msg_block_in[(8 * i) +: 8];
+            if (i < rate_bytes) begin
+                if (i < msg_len_bytes)
+                    pad_block0_out[(8 * i) +: 8] = msg_block_in[(8 * i) +: 8];
+                else if (i == msg_len_bytes)
+                    pad_block0_out[(8 * i) +: 8] = suffix;
+            end
+            // Set pad10*1 terminal bit (0x80) at the end of the rate block
+            if (i == (rate_bytes - 1'b1)) begin
+                if (need_block2)
+                    pad_block1_out[(8 * i) + 7] = 1'b1;
+                else
+                    pad_block0_out[(8 * i) + 7] = 1'b1;
             end
         end
 
-        // Apply domain suffix & multi-rate padding
-        if (valid_bytes < rate_bytes) begin
-            pad_block0_out[(8 * valid_bytes) +: 8] = suffix;
-            pad_block0_out[(8 * (rate_bytes - 1'b1)) +: 8] =
-                pad_block0_out[(8 * (rate_bytes - 1'b1)) +: 8] | 8'h80;
-        end else begin
+        if (need_block2)
             pad_block1_out[7:0] = suffix;
-            pad_block1_out[(8 * (rate_bytes - 1'b1)) +: 8] = 8'h80;
-            need_block2 = 1'b1;
-        end
     end
 
 endmodule
