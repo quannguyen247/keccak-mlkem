@@ -89,8 +89,7 @@ module keccak_top_axi4stream #(
     assign busy = (state != ST_IDLE) && (state != ST_RECOVER);
     assign s_axis_tready = (state == ST_INPUT);
     assign m_axis_tvalid = (state == ST_OUTPUT) && (block_buffer_valid || squeeze_valid);
-    assign m_axis_tdata = block_buffer_valid ? block_buffer[word_index*AXIS_DATA_WIDTH +: AXIS_DATA_WIDTH] 
-                                              : squeeze_data[word_index*AXIS_DATA_WIDTH +: AXIS_DATA_WIDTH];
+    assign m_axis_tdata = block_buffer_valid ? block_buffer[word_index*AXIS_DATA_WIDTH +: AXIS_DATA_WIDTH] : squeeze_data[word_index*AXIS_DATA_WIDTH +: AXIS_DATA_WIDTH];
     assign m_axis_tkeep = {AXIS_BYTES{1'b1}} >> (AXIS_BYTES - output_bytes);
     assign m_axis_tlast = m_axis_tvalid && last_output;
 
