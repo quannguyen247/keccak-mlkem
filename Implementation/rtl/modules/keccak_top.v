@@ -4,20 +4,28 @@
 module keccak_top (
     input wire clk,
     input wire rst_n,
+
+    // Mode select: 0 = SHAKE128, 1 = SHAKE256, 2 = SHA3-256, 3 = SHA3-512
     input wire [`KECCAK_MODE_WIDTH-1:0] mode,
+
+    // Absorb side (message in)
     input wire absorb_valid,
+    output wire absorb_ready,
     input wire absorb_last,
     input wire [`KECCAK_RATE_BITS-1:0] msg_block_in,
     input wire [7:0] msg_len_bytes,
-    output wire absorb_ready,
+
+    // Squeeze side (hash/XOF out)
     input wire squeeze_ready,
-    input wire squeeze_last,
     output wire squeeze_valid,
+    input wire squeeze_last,
     output wire [`KECCAK_RATE_BITS-1:0] squeeze_out,
     output wire [7:0] squeeze_bytes,
-    input wire start,
+
+    // Control and status
+    input wire start,                               
     output wire done,
-    input wire [31:0] output_blocks
+    input wire [31:0] output_blocks // SHAKE only
 );
 
     wire [`KECCAK_RATE_BITS-1:0] padded_block0;
