@@ -55,7 +55,7 @@ module keccak_sponge #(
     wire squeeze_end = (xof_stream_r && squeeze_last) || (!xof_stream_r && squeeze_cnt == 1);
     wire perm_start = absorb_fire || (curr_state == ST_START);
 
-    keccak_permutation_pipeline u_keccak_perm (
+    keccak_permutation u_keccak_perm (
         .clk(clk),
         .rst_n(rst_n),
         .clear(curr_state == ST_IDLE),
