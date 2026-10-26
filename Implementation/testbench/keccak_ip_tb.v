@@ -92,6 +92,9 @@ module keccak_ip_tb;
             done_seen = 1'b1;
     end
 
+    // Back-pressure test: output side randomly drops squeeze_ready
+    always @(negedge clk) squeeze_ready = ($random & 3) != 0;
+
     // Watchdog: if one case runs too long, print a timeout error and stop the simulation
     always @(posedge clk) begin
         if (start)
@@ -107,6 +110,7 @@ module keccak_ip_tb;
     task send_block(input integer len, input last);
     begin
         @(negedge clk);
+        repeat ($random & 3) @(negedge clk); // random idle gap before absorb_valid
         msg_block_in = msg >> (8 * offset);
         msg_len_bytes = len;
         absorb_last = last;
