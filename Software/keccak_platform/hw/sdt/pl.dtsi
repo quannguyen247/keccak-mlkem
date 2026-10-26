@@ -1,0 +1,95 @@
+/ {
+	amba_pl: amba_pl {
+		ranges;
+		compatible = "simple-bus";
+		#address-cells = <2>;
+		#size-cells = <2>;
+		firmware-name = "keccak_system_wrapper.bit.bin";
+		clocking0: clocking0 {
+			compatible = "xlnx,fclk";
+			status = "okay";
+			assigned-clocks = <&zynqmp_clk 71>;
+			assigned-clock-rates = <199998001>;
+			#clock-cells = <0>;
+			clock-output-names = "fabric_clk";
+			clocks = <&zynqmp_clk 71>;
+		};
+		afi0: afi0 {
+			status = "okay";
+			compatible = "xlnx,afi-fpga";
+			resets = <&zynqmp_reset 116>, <&zynqmp_reset 117>, <&zynqmp_reset 118>, <&zynqmp_reset 119>;
+			config-afi = < 0 0>, <1 0>, <2 0>, <3 0>, <4 0>, <5 0>, <6 0>, <7 0>, <8 0>, <9 0>, <10 0>, <11 0>, <12 0>, <13 0>, <14 0xa00>, <15 0x000>;
+		};
+		axi_dma_0: dma@a0000000 {
+			interrupts = < 0 90 4 0 91 4 >;
+			compatible = "xlnx,axi-dma-7.1" , "xlnx,axi-dma-1.00.a";
+			xlnx,s2mm-data-width = <0x40>;
+			xlnx,mm2s-burst-size = <16>;
+			xlnx,m-axi-mm2s-data-width = <64>;
+			xlnx,num-s2mm-channels = <1>;
+			xlnx,dlytmr-resolution = <125>;
+			interrupt-parent = <&imux>;
+			xlnx,sg-length-width = <26>;
+			xlnx,prmry-is-aclk-async = <0>;
+			xlnx,include-s2mm-sf = <1>;
+			#dma-cells = <1>;
+			xlnx,ip-name = "axi_dma";
+			xlnx,single-interface = <0>;
+			xlnx,sg-include-stscntrl-strm = <0>;
+			xlnx,include-s2mm-dre = <1>;
+			reg = <0x0 0xa0000000 0x0 0x10000>;
+			xlnx,addr-width = <64>;
+			xlnx,include-s2mm = <1>;
+			clocks = <&zynqmp_clk 71>, <&zynqmp_clk 71>, <&zynqmp_clk 71>;
+			xlnx,s-axis-s2mm-tdata-width = <64>;
+			xlnx,micro-dma = <0>;
+			xlnx,increase-throughput = <0>;
+			xlnx,mm2s-data-width = <0x40>;
+			xlnx,addrwidth = <0x40>;
+			xlnx,sg-use-stsapp-length = <0>;
+			xlnx,m-axis-mm2s-tdata-width = <64>;
+			xlnx,edk-iptype = "PERIPHERAL";
+			xlnx,s2mm-burst-size = <16>;
+			xlnx,m-axi-s2mm-data-width = <64>;
+			xlnx,num-mm2s-channels = <1>;
+			xlnx,enable-multi-channel = <0>;
+			status = "okay";
+			xlnx,include-mm2s-sf = <1>;
+			clock-names = "m_axi_mm2s_aclk" , "m_axi_s2mm_aclk" , "s_axi_lite_aclk";
+			interrupt-names = "mm2s_introut" , "s2mm_introut";
+			xlnx,include-mm2s = <1>;
+			xlnx,include-mm2s-dre = <1>;
+			xlnx,name = "axi_dma_0";
+			dma_channel_a0000000: dma-channel@a0000000 {
+				interrupts = <0 90 4>;
+				xlnx,datawidth = <0x40>;
+				xlnx,device-id = <0x0>;
+				compatible = "xlnx,axi-dma-mm2s-channel";
+				xlnx,include-dre;
+				dma-channels = <0x1>;
+			};
+			dma_channel_a0000030: dma-channel@a0000030 {
+				interrupts = <0 91 4>;
+				xlnx,datawidth = <0x40>;
+				xlnx,device-id = <0x0>;
+				compatible = "xlnx,axi-dma-s2mm-channel";
+				xlnx,include-dre;
+				dma-channels = <0x1>;
+			};
+		};
+		keccak_core_0: keccak_core@a0010000 {
+			compatible = "xlnx,keccak-core-1.0";
+			interrupts = < 0 89 4 >;
+			interrupt-parent = <&imux>;
+			xlnx,ip-name = "keccak_core";
+			reg = <0x0 0xa0010000 0x0 0x1000>;
+			xlnx,axis-data-width = <64>;
+			clocks = <&zynqmp_clk 71>;
+			xlnx,edk-iptype = "PERIPHERAL";
+			status = "okay";
+			clock-names = "aclk";
+			interrupt-names = "irq";
+			xlnx,name = "keccak_core_0";
+		};
+	};
+};

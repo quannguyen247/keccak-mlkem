@@ -1,0 +1,17 @@
+{
+  "name": "keccak_test",
+  "type": "HOST",
+  "platform": "keccak_platform",
+  "domain": "standalone_psu_cortexa53_0",
+  "cpuInstance": "psu_cortexa53_0",
+  "cpuType": "cortex-a53",
+  "os": "standalone",
+  "configuration": {
+    "componentType": "HOST",
+    "hostToolchainConfigurations": []
+  },
+  "domainRealName": "standalone_psu_cortexa53_0",
+  "useSysrootToolchain": false,
+  "applicationFlow": "EMBEDDED",
+  "templateFlow": "VITIS"
+}
