@@ -31,6 +31,7 @@ module keccak_sponge #(
 
     `include "keccak_funcs.vh"
 
+    // Sponge FSM states
     localparam [5:0] ST_IDLE    = 6'b000001;
     localparam [5:0] ST_ABSORB  = 6'b000010;
     localparam [5:0] ST_START   = 6'b000100;
@@ -39,21 +40,26 @@ module keccak_sponge #(
     localparam [5:0] ST_DONE    = 6'b100000;
 
     reg [5:0] curr_state, next_state;
-    reg [`KECCAK_MODE_WIDTH-1:0] mode_r;
+
+    // Job config
+    reg [`KECCAK_MODE_WIDTH-1:0] mode_reg;
+    reg [BLOCK_WIDTH-1:0] squeeze_left_reg;
+    reg xof_stream_reg;           
+    reg absorb_last_reg;
+
+    // Rate-masked datapath
     reg [`KECCAK_STATE_WIDTH-1:0] absorb_block;
-    reg [BLOCK_WIDTH-1:0] squeeze_cnt;
-    reg xof_stream_r;
-    reg absorb_last_r;
-    reg [7:0] squeeze_bytes_r;
     reg [`KECCAK_RATE_BITS-1:0] squeeze_data;
 
-    wire [`KECCAK_STATE_WIDTH-1:0] keccak_state;
-    wire perm_last;
+    // Absorb/squeeze handshake flags
     wire absorb_fire = (curr_state == ST_ABSORB) && absorb_valid;
-    wire squeeze_more = xof_stream_r || (squeeze_cnt > 0);
-    wire squeeze_fire = (curr_state == ST_SQUEEZE) && squeeze_ready && squeeze_more;
-    wire squeeze_end = (xof_stream_r && squeeze_last) || (!xof_stream_r && squeeze_cnt == 1);
+    wire squeeze_fire = (curr_state == ST_SQUEEZE) && squeeze_ready;
+    wire squeeze_end = (xof_stream_reg && squeeze_last) || (!xof_stream_reg && squeeze_left_reg == 1);
+
+    // Keccak permutation interface
+    wire [`KECCAK_STATE_WIDTH-1:0] keccak_state;
     wire perm_start = absorb_fire || (curr_state == ST_START);
+    wire perm_last;
 
     keccak_permutation u_keccak_perm (
         .clk(clk),
@@ -71,19 +77,11 @@ module keccak_sponge #(
         case (curr_state)
             ST_IDLE: if (start)
                 next_state = ST_ABSORB;
-            ST_ABSORB: if (absorb_valid)
+            ST_ABSORB: if (absorb_fire)
                 next_state = ST_PERMUTE;
             ST_START: next_state = ST_PERMUTE;
-            ST_PERMUTE: begin
-                if (perm_last) begin
-                    if (!absorb_last_r)
-                        next_state = ST_ABSORB;
-                    else if (squeeze_more)
-                        next_state = ST_SQUEEZE;
-                    else
-                        next_state = ST_DONE;
-                end
-            end
+            ST_PERMUTE: if (perm_last)
+                next_state = absorb_last_reg ? ST_SQUEEZE : ST_ABSORB;
             ST_SQUEEZE: if (squeeze_fire)
                 next_state = squeeze_end ? ST_DONE : ST_START;
             ST_DONE: next_state = ST_IDLE;
@@ -91,10 +89,11 @@ module keccak_sponge #(
         endcase
     end
 
+    // Absorb mask
     always @(*) begin
         absorb_block = {`KECCAK_STATE_WIDTH{1'b0}};
 
-        case (mode_r)
+        case (mode_reg)
             `KECCAK_MODE_SHAKE128: begin
                 absorb_block[`SHAKE128_RATE_BITS-1:0] = absorb_in[`SHAKE128_RATE_BITS-1:0];
             end
@@ -107,15 +106,13 @@ module keccak_sponge #(
         endcase
     end
 
+    // Squeeze mask
     always @(*) begin
         squeeze_data = {`KECCAK_RATE_BITS{1'b0}};
 
-        case (mode_r)
+        case (mode_reg)
             `KECCAK_MODE_SHAKE128: begin
                 squeeze_data = keccak_state[`SHAKE128_RATE_BITS-1:0];
-            end
-            `KECCAK_MODE_SHAKE256: begin
-                squeeze_data[`SHAKE256_RATE_BITS-1:0] = keccak_state[`SHAKE256_RATE_BITS-1:0];
             end
             `KECCAK_MODE_SHA3_256: begin
                 squeeze_data[(`SHA3_256_DIGEST * 8)-1:0] = keccak_state[(`SHA3_256_DIGEST * 8)-1:0];
@@ -129,38 +126,38 @@ module keccak_sponge #(
         endcase
     end
 
+    // Sponge FSMD update
     always @(posedge clk) begin
         if (!rst_n) begin
-            mode_r <= `KECCAK_MODE_SHAKE256;
+            mode_reg <= `KECCAK_MODE_SHAKE256;
             curr_state <= ST_IDLE;
         end else begin
             curr_state <= next_state;
             case (curr_state)
                 ST_IDLE: begin
                     if (start) begin
-                        mode_r <= mode;
-                        squeeze_cnt <= keccak_is_xof(mode) ? output_blocks : 1;
-                        xof_stream_r <= keccak_is_xof(mode) && (output_blocks == 0);
-                        absorb_last_r <= 1'b0;
-                        squeeze_bytes_r <= keccak_output_bytes(mode);
+                        mode_reg <= mode;
+                        squeeze_left_reg <= keccak_is_xof(mode) ? output_blocks : 1;
+                        xof_stream_reg <= keccak_is_xof(mode) && (output_blocks == 0);
                     end
                 end
                 ST_ABSORB: begin
-                    if (absorb_valid)
-                        absorb_last_r <= absorb_last;
+                    if (absorb_fire)
+                        absorb_last_reg <= absorb_last;
                 end
                 ST_SQUEEZE: begin
-                    if (squeeze_fire && !xof_stream_r)
-                        squeeze_cnt <= squeeze_cnt - 1'b1;
+                    if (squeeze_fire && !xof_stream_reg)
+                        squeeze_left_reg <= squeeze_left_reg - 1'b1;
                 end
+                default: ;
             endcase
         end
     end
 
     assign absorb_ready = (curr_state == ST_ABSORB);
-    assign squeeze_valid = (curr_state == ST_SQUEEZE) && (xof_stream_r || squeeze_cnt > 0);
+    assign squeeze_valid = (curr_state == ST_SQUEEZE);
     assign squeeze_out = squeeze_data;
-    assign squeeze_bytes = squeeze_bytes_r;
+    assign squeeze_bytes = keccak_output_bytes(mode_reg);
     assign done = (curr_state == ST_DONE);
 
 endmodule
