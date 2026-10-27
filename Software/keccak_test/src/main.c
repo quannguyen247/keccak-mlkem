@@ -15,13 +15,17 @@
 #define REG_MESSAGE_BYTES 0x0C
 #define REG_OUTPUT_BYTES  0x10
 
-//
+// DMA & buffer control (aligned)
 static XAxiDma dma;
 static u8 msg[64] __attribute__((aligned(64))) = "abc";
 static u8 out[64] __attribute__((aligned(64)));
-static const char hex[] = "0123456789abcdef";
+
+// Configuration
+static const char hex[] = "0123456789abcdef"; // Convert a nibble to hex char
 static const char *const names[] = {"SHAKE128", "SHAKE256", "SHA3-256", "SHA3-512"};
 static const u32 output_bytes[] = {32, 64, 32, 64};
+
+// Expected reference output for "abc"
 static const char *const reference[] = {
     "5881092dd818bf5cf8a3ddb793fbcba74097d5c526a6d35f97b83351940f2cc8",
     "483366601360a8771c6863080cc4114d8db44530f8f1e1ee4f94ea37e78b5739d5a15bef186a5386c75744c0527e1faa9f8726e462a12a4feb06bd8801e751e4",
@@ -38,6 +42,7 @@ int main(void)
     int status;
     u32 core_status, tx_status, rx_status;
 
+    // Look up DMA hardware configuration & initialize driver
     config = XAxiDma_LookupConfig(XPAR_AXI_DMA_0_BASEADDR);
     if (config == NULL) {
         xil_printf("DMA config not found\r\n");
@@ -48,13 +53,15 @@ int main(void)
         xil_printf("DMA initialization failed (%d)\r\n", status);
         return XST_FAILURE;
     }
+
+    // Disable MM2S & S2MM IRQ (not used)
     XAxiDma_IntrDisable(&dma, XAXIDMA_IRQ_ALL_MASK, XAXIDMA_DEVICE_TO_DMA);
     XAxiDma_IntrDisable(&dma, XAXIDMA_IRQ_ALL_MASK, XAXIDMA_DMA_TO_DEVICE);
-
+    
     xil_printf("\r\n%s, mode=%d, message=\"abc\"\r\n", names[mode], (int)mode);
 
     // Prepare the core and DMA RX before arming ILA
-    Xil_Out32(KECCAK + REG_CONTROL, 0x6); // RESET | CLEAR
+    Xil_Out32(KECCAK + REG_CONTROL, 0x2); // RESET
     Xil_DCacheFlushRange((UINTPTR)msg, 64);
     Xil_DCacheFlushRange((UINTPTR)out, 64);
     status = XAxiDma_SimpleTransfer(&dma, (UINTPTR)out, out_len, XAXIDMA_DEVICE_TO_DMA);
@@ -63,20 +70,20 @@ int main(void)
         goto fail;
     }
 
-    // CPU commands visible on slot 0
-    Xil_Out32(KECCAK + REG_MODE, mode);
-    Xil_Out32(KECCAK + REG_MESSAGE_BYTES, 3);
-    Xil_Out32(KECCAK + REG_OUTPUT_BYTES, out_len);
-    Xil_Out32(KECCAK + REG_CONTROL, 0x101); // START | IRQ_EN
-
-    // Send "abc" on slot 1; receive the digest on slot 2
+    // Start DMA TX transfer (MM2S): Stream 3-byte message "abc" to Keccak IP
     status = XAxiDma_SimpleTransfer(&dma, (UINTPTR)msg, 3, XAXIDMA_DMA_TO_DEVICE);
     if (status != XST_SUCCESS) {
         xil_printf("TX submit failed (%d)\r\n", status);
         goto fail;
     }
 
-    // Require core DONE and both DMA channels idle; stop on any error
+    // Configure Keccak IP parameters and trigger START
+    Xil_Out32(KECCAK + REG_MODE, mode);
+    Xil_Out32(KECCAK + REG_MESSAGE_BYTES, 3);
+    Xil_Out32(KECCAK + REG_OUTPUT_BYTES, out_len);
+    Xil_Out32(KECCAK + REG_CONTROL, 0x101); // START | IRQ_EN
+
+    // Poll until Keccak core is DONE and both DMA channels are IDLE
     while (1) {
         core_status = Xil_In32(KECCAK + REG_STATUS);
         tx_status = XAxiDma_ReadReg(dma.RegBase + XAXIDMA_TX_OFFSET, XAXIDMA_SR_OFFSET);
@@ -87,9 +94,11 @@ int main(void)
             (tx_status & XAXIDMA_IDLE_MASK) && (rx_status & XAXIDMA_IDLE_MASK))
             break;
     }
+
+    // Invalidate CPU cache to read fresh hash digest directly from DDR RAM
     Xil_DCacheInvalidateRange((UINTPTR)out, 64);
 
-    // Print digest and compare each byte with reference hex string
+    // Print output and compare each byte with reference hex string
     xil_printf("%s: ", names[mode]);
     for (u32 i = 0; i < out_len; i++) {
         xil_printf("%02x", out[i]);
@@ -98,7 +107,7 @@ int main(void)
     }
     xil_printf(" -> %s\r\n", pass ? "PASS" : "FAIL");
     return pass ? XST_SUCCESS : XST_FAILURE;
-//concak
+
 fail:
     core_status = Xil_In32(KECCAK + REG_STATUS);
     tx_status = XAxiDma_ReadReg(dma.RegBase + XAXIDMA_TX_OFFSET, XAXIDMA_SR_OFFSET);
