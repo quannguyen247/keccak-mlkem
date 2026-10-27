@@ -168,9 +168,9 @@ module keccak_ip_tb;
         out_cnt = 0; mismatch = 0; done_seen = 1'b0; out_len = 0;
 
         report_fd = $fopen({tb_dir, "keccak_ip_result.log"}, "w");
-        spec_fd = $fopen({tb_dir, "../vector/keccak_ip_tv_spec.txt"}, "r");
+        spec_fd = $fopen({tb_dir, "../vector/keccak_tv_spec.txt"}, "r");
         if (spec_fd == 0) begin
-            $display("ERROR: Cannot open vector/keccak_ip_tv_spec.txt, run keccak_ip_vector.py first");
+            $display("ERROR: Cannot open vector/keccak_tv_spec.txt, run keccak_vector.py first");
             $finish;
         end
         j = $fscanf(spec_fd, "tv_count=%d", tv_count);
@@ -180,7 +180,7 @@ module keccak_ip_tb;
             $display("ERROR: tv_count exceeds MAX_VEC");
             $finish;
         end
-        $readmemh({tb_dir, "../vector/keccak_ip_tv.mem"}, vec_all, 0, tv_count - 1);
+        $readmemh({tb_dir, "../vector/keccak_tv.mem"}, vec_all, 0, tv_count - 1);
 
         // Reset
         #100;
