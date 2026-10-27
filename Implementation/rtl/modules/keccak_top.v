@@ -28,23 +28,18 @@ module keccak_top (
     input wire [31:0] output_blocks // SHAKE only
 );
 
+    // Padding unit outputs
     wire [`KECCAK_RATE_BITS-1:0] padded_block0;
     wire [`KECCAK_RATE_BITS-1:0] padded_block1_unused;
     wire need_block2_unused;
-    wire sponge_absorb_ready;
-    reg [`KECCAK_MODE_WIDTH-1:0] mode_r;
-    reg [`KECCAK_RATE_BITS-1:0] msg_block_r;
-    reg [7:0] msg_len_bytes_r;
-    reg block_valid_r;
-    reg block_last_r;
-    reg [`KECCAK_RATE_BITS-1:0] padded_block_r;
-    reg padded_valid_r;
-    reg padded_last_r;
+
+    // Job config
+    reg [`KECCAK_MODE_WIDTH-1:0] mode_reg;
 
     keccak_pad_block u_pad (
-        .mode(mode_r),
-        .msg_block_in(msg_block_r),
-        .msg_len_bytes(msg_len_bytes_r),
+        .mode(mode_reg),
+        .msg_block_in(msg_block_in),
+        .msg_len_bytes(msg_len_bytes),
         .pad_block0_out(padded_block0),
         .pad_block1_out(padded_block1_unused),
         .need_block2(need_block2_unused)
@@ -54,10 +49,10 @@ module keccak_top (
         .clk(clk),
         .rst_n(rst_n),
         .mode(mode),
-        .absorb_valid(padded_valid_r),
-        .absorb_last(padded_last_r),
-        .absorb_in(padded_block_r),
-        .absorb_ready(sponge_absorb_ready),
+        .absorb_valid(absorb_valid),
+        .absorb_last(absorb_last),
+        .absorb_in(padded_block0),
+        .absorb_ready(absorb_ready),
         .squeeze_ready(squeeze_ready),
         .squeeze_last(squeeze_last),
         .squeeze_valid(squeeze_valid),
@@ -68,33 +63,12 @@ module keccak_top (
         .output_blocks(output_blocks)
     );
 
-    assign absorb_ready = !block_valid_r && !start;
-
+    // Job config update
     always @(posedge clk) begin
-        if (!rst_n) begin
-            mode_r <= `KECCAK_MODE_SHAKE256;
-            block_valid_r <= 1'b0;
-            padded_valid_r <= 1'b0;
-        end else if (start) begin
-            mode_r <= mode;
-            block_valid_r <= 1'b0;
-            padded_valid_r <= 1'b0;
-        end else begin
-            if (padded_valid_r && sponge_absorb_ready)
-                padded_valid_r <= 1'b0;
-            if (block_valid_r && !padded_valid_r) begin
-                padded_block_r <= padded_block0;
-                padded_last_r <= block_last_r;
-                padded_valid_r <= 1'b1;
-                block_valid_r <= 1'b0;
-            end
-            if (absorb_valid && absorb_ready) begin
-                msg_block_r <= msg_block_in;
-                msg_len_bytes_r <= msg_len_bytes;
-                block_last_r <= absorb_last;
-                block_valid_r <= 1'b1;
-            end
-        end
+        if (!rst_n)
+            mode_reg <= `KECCAK_MODE_SHAKE256;
+        else if (start)
+            mode_reg <= mode;
     end
 
 endmodule
