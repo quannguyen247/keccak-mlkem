@@ -1,174 +1,117 @@
-# SHAKE256 FPGA / IP Core
+# Keccak SHA3/SHAKE FPGA core for ML-KEM
 
-SHAKE256 FPGA is a synthesizable Verilog RTL implementation of the SHAKE256 sponge construction and the Keccak-f[1600] permutation. It is delivered as an IP-style core with a verification environment and a Python vector generator.
+This repository contains synthesizable Verilog RTL for Keccak-f[1600] and the
+four FIPS 202 functions used by ML-KEM: SHAKE128, SHAKE256, SHA3-256 and
+SHA3-512. The core computes one permutation round per clock cycle and keeps a
+single 1600-bit state shared by the permutation and the sponge. Padding is done
+in hardware. An AXI4-Lite and AXI4-Stream wrapper connects the core to an AMD
+AXI DMA on the Kria KV260.
 
-The repository is organized as an out-of-context (OOC) Vivado project, so it is intended for standalone RTL synthesis, simulation, and integration into a larger system. It is not a board-ready design with a complete board-specific wrapper and pinout.
+The core is a building block for a later ML-KEM accelerator. It does not
+implement ML-KEM KeyGen, Encaps or Decaps.
 
-## Key Facts
+## Key results
 
-- Top design: [Implementation/rtl/modules/shake256_sponge.v](Implementation/rtl/modules/shake256_sponge.v)
-- Top testbench: [Implementation/testbench/tb_shake256_top.v](Implementation/testbench/tb_shake256_top.v)
-- Vector generator: [Implementation/vectors/test_vectors.py](Implementation/vectors/test_vectors.py)
-- Vivado version: 2025.2.1 (64-bit)
-- Target part in the project: `xc7a100tcsg324-1`
-- Synthesis mode: out-of-context (OOC)
-- Verification: the current regression flow has been run successfully in both behavioral simulation and post-implementation timing simulation
+The standalone out-of-context run uses AMD Vivado 2025.2.1 on Artix-7
+`xc7a100tcsg324-1` at 200 MHz (5 ns clock period), with default synthesis and
+implementation strategies and no debug cores:
 
-## Project Status
+- Resources: 5,868 LUTs (all logic), 1,675 flip-flops, 0 BRAM, 0 DSP.
+- Timing: WNS = +0.125 ns, WHS = +0.104 ns, no failing endpoints. The
+  estimated Fmax from WNS is 1000 / (5.000 - 0.125), about 205 MHz.
+- Latency: 24 cycles per permutation. A single-block SHA3-256 request takes
+  26 cycles from `start` to the digest. Dependent message blocks are absorbed
+  every 25 cycles and SHAKE output blocks follow every 26 cycles.
+- Throughput: SHA3-256 over 16 KiB takes 3,026 cycles, or 8.66 Gbit/s at
+  200 MHz, in RTL simulation.
+- Power: Vivado estimates 0.577 W total on-chip power (0.491 W dynamic,
+  0.085 W static) with default vectorless switching activity. This is an
+  estimate, not a board measurement.
 
-This repository provides an IP core for SHAKE256 research, verification, and reuse. It intentionally does not ship with:
+The KV260 designs include the Zynq PS, the DMA, interconnect and, in one
+build, a System ILA. Their resource figures belong to a different device and
+context and are listed separately in the [specification](Implementation/docs/SPEC.md#implementation-results).
 
-- a production board wrapper
-- board-specific pinout constraints
-- a ready-to-program bitstream for a particular FPGA board
+## Source layout
 
-The constraint file [Implementation/constraints/shake256.xdc](Implementation/constraints/shake256.xdc) currently defines a 5 ns clock and switching-activity assumptions for analysis. It is not a board pinout file.
+| Path | Purpose |
+| --- | --- |
+| [`Implementation/rtl/`](Implementation/rtl/) | Core RTL (`modules/`) and shared headers (`utils/`) |
+| [`Implementation/testbench/`](Implementation/testbench/) | Self-checking testbenches for the core and the SoC wrapper |
+| [`Implementation/vector/`](Implementation/vector/) | `keccak_vector.py`, the golden-vector generator shared by both testbenches |
+| [`Implementation/constraint/`](Implementation/constraint/) | 5 ns clock constraint for the standalone build |
+| [`Implementation/project/keccak_ip/`](Implementation/project/keccak_ip/) | Artix-7 out-of-context project for `keccak_top` |
+| [`Implementation/project/keccak_soc/`](Implementation/project/keccak_soc/) | KV260 block design without debug cores |
+| [`Implementation/project/keccak_soc_ila/`](Implementation/project/keccak_soc_ila/) | KV260 block design with a System ILA; its XSA feeds the Vitis platform |
+| [`Implementation/project/ip_repo/keccak_core/`](Implementation/project/ip_repo/keccak_core/) | Packaged IP `quannguyen247.org:user:keccak_core:1.0` |
+| [`Implementation/docs/SPEC.md`](Implementation/docs/SPEC.md) | IP technical specification and register map |
+| [`Software/`](Software/) | Vitis 2025.2 workspace: KV260 platform and the `keccak_test` bare-metal app |
 
-## Directory Layout
+| RTL module | Role |
+| --- | --- |
+| `keccak_permutation.v` | Keccak-f[1600], one round per cycle |
+| `keccak_sponge.v` | Absorb and squeeze FSM for the four modes |
+| `keccak_pad_block.v` | Combinational FIPS 202 padding |
+| `keccak_top.v` | Native core: padding and sponge |
+| `keccak_top_wrapper.v` | AXI4-Lite registers and AXI4-Stream ports for DMA use |
 
-- [Implementation/rtl/modules/](Implementation/rtl/modules/) - core RTL modules
-- [Implementation/rtl/utils/](Implementation/rtl/utils/) - shared Verilog defines and helper functions
-- [Implementation/testbench/](Implementation/testbench/) - top-level testbench and simulation logs
-- [Implementation/vectors/](Implementation/vectors/) - vector generator and generated test files
-- [Implementation/constraints/](Implementation/constraints/) - Vivado XDC constraints
-- [Implementation/SHAKE256.xpr](Implementation/SHAKE256.xpr) - Vivado project file
-- [Implementation/SHAKE256.runs/](Implementation/SHAKE256.runs/) - synthesis and implementation runs
-- [Implementation/SHAKE256.sim/](Implementation/SHAKE256.sim/) - simulation outputs
+Vivado run directories, generated vectors and Vitis build output are not
+tracked. Rebuild them after changing RTL, constraints or software.
 
-## RTL Architecture
+## Test and build
 
-### `shake256_sponge.v`
+Generate the vectors, then run both testbenches from the `Implementation`
+directory. The testbenches find the vector files relative to their own path,
+so the working directory matters.
 
-The top design module [Implementation/rtl/modules/shake256_sponge.v](Implementation/rtl/modules/shake256_sponge.v) controls the full SHAKE256 flow with a simple handshake interface:
-
-- `start` / `done`
-- `input_blocks` / `output_blocks`
-- `absorb_valid` / `absorb_ready`
-- `squeeze_valid` / `squeeze_ready`
-- 1088-bit absorb and squeeze data paths
-
-Internal control flow:
-
-1. `ST_IDLE` - wait for `start`
-2. `ST_ABSORB` - accept padded absorb blocks and XOR them into the Keccak state
-3. `ST_START` - launch the permutation pipeline
-4. `ST_PERMUTE` - run the Keccak-f[1600] permutation
-5. `ST_SQUEEZE` - present 1088-bit rate data
-6. `ST_DONE` - finish the transaction and return to idle
-
-### `keccak_permutation_pipeline.v`
-
-The Keccak-f[1600] permutation is implemented as a 2-stage pipeline:
-
-- Stage 1: `theta + rho + pi`
-- Stage 2: `chi + iota`
-
-This pipeline operates on the full 1600-bit Keccak state, which is 25 lanes of 64 bits each. The design follows the 24-round Keccak-f[1600] schedule.
-
-### `keccak_theta_rho_pi_stage.v`
-
-This stage performs the first three Keccak steps:
-
-- `theta` - column parity and state diffusion
-- `rho` - lane rotations
-- `pi` - lane permutation
-
-### `keccak_chi_iota_stage.v`
-
-This stage performs the final two Keccak steps:
-
-- `chi` - non-linear row mixing
-- `iota` - XOR of the round constant into lane `A[0,0]`
-
-### `shake256_pad_block.v`
-
-The padding helper [Implementation/rtl/modules/shake256_pad_block.v](Implementation/rtl/modules/shake256_pad_block.v) builds SHAKE256 multi-rate padded blocks:
-
-- inserts the `0x1F` domain-separation byte
-- sets the final `0x80` bit
-- raises `need_block2` when the message fills the full 136-byte rate block
-
-## Test Vector Generation
-
-The vector generator [Implementation/vectors/test_vectors.py](Implementation/vectors/test_vectors.py) uses Python's `hashlib.shake_256` as the reference model.
-
-### How to run
-
-```powershell
-python Implementation/vectors/test_vectors.py
-python Implementation/vectors/test_vectors.py clear
-python Implementation/vectors/test_vectors.py 1000
+```sh
+cd Implementation
+python3 vector/keccak_vector.py 150
 ```
 
-### Script behavior
+```sh
+iverilog -g2012 -I rtl/utils -o keccak_ip.vvp testbench/keccak_ip_tb.v rtl/modules/*.v
+vvp -n keccak_ip.vvp
+```
 
-- No argument: generate the default vector set.
-- `clear`: delete generated `tv_*` files in [Implementation/vectors/](Implementation/vectors/), including `tv_all.mem` and `tv_spec.txt`.
-- Integer argument `N`: keep the 143 base cases and add random test cases until the total count reaches `N` when `N > 143`.
+```sh
+iverilog -g2012 -I rtl/utils -o keccak_soc.vvp testbench/keccak_soc_tb.v rtl/modules/*.v
+vvp -n keccak_soc.vvp
+```
 
-The default base set contains 143 cases:
+Both runs print a pass count and write a per-case log to
+`testbench/keccak_ip_result.log` and `testbench/keccak_soc_result.log`. The
+current RTL passes 150/150 cases in each. The same testbenches are the
+simulation tops in the Vivado projects.
 
-- 4 fixed cases
-- 2 XOF proof cases
-- 137 exhaustive message-length cases covering lengths 0 through 136 bytes
+For implementation, open `Implementation/project/keccak_ip/keccak_ip.xpr` in
+Vivado 2025.2.1 and run synthesis and implementation. For the board, build
+`keccak_soc_ila`, export the hardware with the bitstream, update the Vitis
+platform in `Software/keccak_platform`, and run `keccak_test`. Set `TEST_MODE`
+in `Software/keccak_test/src/main.c` to choose the function. The program
+hashes `"abc"` through the DMA and prints `PASS` or `FAIL` over UART.
 
-For example, `python Implementation/vectors/test_vectors.py 1000` generates 1000 total cases by appending random cases after the 143 base cases.
+Simulation checks the core against Python `hashlib` with directed boundary
+cases and random messages. It does not cover the wrapper error paths, and it
+does not establish throughput on the board, where DMA, DDR and software costs
+have not been measured.
 
-### Generated files
+## Documentation
 
-- `tv_all.mem` - hex-encoded test data for `$readmemh`
-- `tv_spec.txt` - metadata used by the testbench
+- [IP technical specification](Implementation/docs/SPEC.md): interfaces,
+  microarchitecture, register map, error codes, KV260 integration, performance
+  and verification.
 
-The metadata file currently records fields such as:
+## References
 
-- `tv_count`
-- `rate_bytes`
-- `max_squeeze_blocks`
-- `fixed_cases`
-- `xof_proof_cases`
-- `exhaustive_length_cases`
-- `random_cases`
-
-The testbench reads `tv_spec.txt` to learn how many test cases to execute and uses `tv_all.mem` as the source of expected input and output data.
-
-## Testbench
-
-The top testbench [Implementation/testbench/tb_shake256_top.v](Implementation/testbench/tb_shake256_top.v) instantiates the SHAKE256 sponge core and the padding helper, then executes the generated test vectors one by one.
-
-It:
-
-- instantiates `shake256_sponge`
-- instantiates `shake256_pad_block`
-- reads `tv_spec.txt` and `tv_all.mem`
-- runs each case sequentially
-- writes the simulation report to `Implementation/testbench/result.log`
-
-Current verification parameters include:
-
-- `TIMEOUT_CYCLES = 1836` per test case
-- `MAX_BUFFER = 1024`
-- support for multi-block absorb and multi-block squeeze flows
-
-## Vivado Flow
-
-1. Open [Implementation/SHAKE256.xpr](Implementation/SHAKE256.xpr)
-2. Set `tb_shake256_top` as the simulation top
-3. Run Behavioral Simulation for functional verification
-4. Run Implementation and Post-Implementation Timing Simulation for timing validation
-
-The current Vivado project is configured with:
-
-- Product Version: Vivado 2025.2.1 (64-bit)
-- Design top: `shake256_sponge`
-- Simulation top: `tb_shake256_top`
-- Synthesis mode: `out_of_context`
-
-## Notes
-
-- This repository is IP-style RTL, not a complete board-level design.
-- If you want to integrate it into a real FPGA system, you should add your own wrapper, serializer/deserializer, or bus interface.
-- The current vector set and testbench are designed for deterministic regression and easy re-run of results.
+1. National Institute of Standards and Technology, *SHA-3 Standard:
+   Permutation-Based Hash and Extendable-Output Functions*, FIPS 202, Aug.
+   2015. DOI: [10.6028/NIST.FIPS.202](https://doi.org/10.6028/NIST.FIPS.202).
+2. National Institute of Standards and Technology, *Module-Lattice-Based
+   Key-Encapsulation Mechanism Standard*, FIPS 203, Aug. 2024. DOI:
+   [10.6028/NIST.FIPS.203](https://doi.org/10.6028/NIST.FIPS.203).
 
 ## License
 
-This project is licensed under the [Apache License 2.0](LICENSE).
+This project is licensed under the Apache License 2.0. See [LICENSE](LICENSE)
+for details.
