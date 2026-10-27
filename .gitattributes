@@ -1,2 +1,13 @@
+* text=auto eol=lf
+
 *.vh linguist-language=Verilog
 *.v linguist-language=Verilog
+*.sv linguist-language=SystemVerilog
+*.pdf binary
+*.png binary
+*.gz binary
+*.xsa binary
+*.bit binary
+*.dcp binary
+*.elf binary
+*.wlf binary
