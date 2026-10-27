@@ -94,7 +94,6 @@ module keccak_permutation (
         if (!rst_n) begin
             curr_state <= ST_IDLE;
             state_out <= {`KECCAK_STATE_WIDTH{1'b0}};
-            round_ctr <= 5'd0;
         end else begin
             curr_state <= next_state;
             case (curr_state)
