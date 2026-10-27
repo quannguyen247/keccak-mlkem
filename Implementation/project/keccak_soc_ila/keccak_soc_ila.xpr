@@ -7,7 +7,7 @@
 <Project Product="Vivado" Version="7" Minor="71" Path="keccak_soc_ila.xpr">
   <DefaultLaunch Dir="$PRUNDIR"/>
   <Configuration>
-    <Option Name="Id" Val="fa23bd35a26442b7b31a605a9f4742e8"/>
+    <Option Name="Id" Val="e36f0f4e6a1349998dbaed05a5fa614c"/>
     <Option Name="Part" Val="xck26-sfvc784-2LV-c"/>
     <Option Name="CompiledLibDir" Val="$PCACHEDIR/compile_simlib"/>
     <Option Name="CompiledLibDirXSim" Val=""/>
@@ -47,7 +47,7 @@
     <Option Name="ActiveSimSet" Val="sim_1"/>
     <Option Name="DefaultLib" Val="xil_defaultlib"/>
     <Option Name="ProjectType" Val="Default"/>
-    <Option Name="IPRepoPath" Val="$PPRDIR/../ip_repo"/>
+    <Option Name="IPRepoPath" Val="$PPRDIR/../ip_repo/keccak_core"/>
     <Option Name="IPOutputRepo" Val="$PCACHEDIR/ip"/>
     <Option Name="IPDefaultOutputPath" Val="$PGENDIR/sources_1"/>
     <Option Name="IPCachePermission" Val="read"/>
@@ -60,19 +60,19 @@
     <Option Name="IPStaticSourceDir" Val="$PIPUSERFILESDIR/ipstatic"/>
     <Option Name="EnableBDX" Val="FALSE"/>
     <Option Name="DSABoardId" Val="kv260_som"/>
-    <Option Name="WTXSimLaunchSim" Val="0"/>
+    <Option Name="WTXSimLaunchSim" Val="5"/>
     <Option Name="WTModelSimLaunchSim" Val="0"/>
     <Option Name="WTQuestaLaunchSim" Val="0"/>
     <Option Name="WTIesLaunchSim" Val="0"/>
     <Option Name="WTVcsLaunchSim" Val="0"/>
     <Option Name="WTRivieraLaunchSim" Val="0"/>
     <Option Name="WTActivehdlLaunchSim" Val="0"/>
-    <Option Name="WTXSimExportSim" Val="2"/>
-    <Option Name="WTModelSimExportSim" Val="2"/>
-    <Option Name="WTQuestaExportSim" Val="2"/>
+    <Option Name="WTXSimExportSim" Val="1"/>
+    <Option Name="WTModelSimExportSim" Val="1"/>
+    <Option Name="WTQuestaExportSim" Val="1"/>
     <Option Name="WTIesExportSim" Val="0"/>
-    <Option Name="WTVcsExportSim" Val="2"/>
-    <Option Name="WTRivieraExportSim" Val="2"/>
+    <Option Name="WTVcsExportSim" Val="1"/>
+    <Option Name="WTRivieraExportSim" Val="1"/>
     <Option Name="WTActivehdlExportSim" Val="0"/>
     <Option Name="GenerateIPUpgradeLog" Val="TRUE"/>
     <Option Name="XSimRadix" Val="hex"/>
@@ -91,106 +91,13 @@
   <FileSets Version="1" Minor="32">
     <FileSet Name="sources_1" Type="DesignSrcs" RelSrcDir="$PSRCDIR/sources_1" RelGenDir="$PGENDIR/sources_1">
       <Filter Type="Srcs"/>
-      <File Path="$PSRCDIR/sources_1/imports/Implementation/rtl/utils/keccak_defs.vh">
-        <FileInfo>
-          <Attr Name="AutoDisabled" Val="1"/>
-          <Attr Name="ImportPath" Val="$PPRDIR/../../rtl/utils/keccak_defs.vh"/>
-          <Attr Name="ImportTime" Val="1792312054"/>
-          <Attr Name="UsedIn" Val="synthesis"/>
-          <Attr Name="UsedIn" Val="simulation"/>
-          <Attr Name="IsVisible" Val="1"/>
-        </FileInfo>
-      </File>
-      <File Path="$PSRCDIR/sources_1/imports/Implementation/rtl/modules/keccak_chi_iota_stage.v">
-        <FileInfo>
-          <Attr Name="AutoDisabled" Val="1"/>
-          <Attr Name="ImportPath" Val="$PPRDIR/../../rtl/modules/keccak_chi_iota_stage.v"/>
-          <Attr Name="ImportTime" Val="1792313278"/>
-          <Attr Name="UsedIn" Val="synthesis"/>
-          <Attr Name="UsedIn" Val="implementation"/>
-          <Attr Name="UsedIn" Val="simulation"/>
-        </FileInfo>
-      </File>
-      <File Path="$PSRCDIR/sources_1/imports/Implementation/rtl/utils/keccak_funcs.vh">
-        <FileInfo>
-          <Attr Name="AutoDisabled" Val="1"/>
-          <Attr Name="ImportPath" Val="$PPRDIR/../../rtl/utils/keccak_funcs.vh"/>
-          <Attr Name="ImportTime" Val="1792315634"/>
-          <Attr Name="UsedIn" Val="synthesis"/>
-          <Attr Name="UsedIn" Val="simulation"/>
-          <Attr Name="IsVisible" Val="1"/>
-        </FileInfo>
-      </File>
-      <File Path="$PSRCDIR/sources_1/imports/Implementation/rtl/modules/keccak_pad_block.v">
-        <FileInfo>
-          <Attr Name="AutoDisabled" Val="1"/>
-          <Attr Name="ImportPath" Val="$PPRDIR/../../rtl/modules/keccak_pad_block.v"/>
-          <Attr Name="ImportTime" Val="1792595973"/>
-          <Attr Name="UsedIn" Val="synthesis"/>
-          <Attr Name="UsedIn" Val="implementation"/>
-          <Attr Name="UsedIn" Val="simulation"/>
-        </FileInfo>
-      </File>
-      <File Path="$PSRCDIR/sources_1/imports/Implementation/rtl/modules/keccak_permutation_pipeline.v">
-        <FileInfo>
-          <Attr Name="AutoDisabled" Val="1"/>
-          <Attr Name="ImportPath" Val="$PPRDIR/../../rtl/modules/keccak_permutation_pipeline.v"/>
-          <Attr Name="ImportTime" Val="1792776450"/>
-          <Attr Name="UsedIn" Val="synthesis"/>
-          <Attr Name="UsedIn" Val="implementation"/>
-          <Attr Name="UsedIn" Val="simulation"/>
-        </FileInfo>
-      </File>
-      <File Path="$PSRCDIR/sources_1/imports/Implementation/rtl/modules/keccak_sponge.v">
-        <FileInfo>
-          <Attr Name="AutoDisabled" Val="1"/>
-          <Attr Name="ImportPath" Val="$PPRDIR/../../rtl/modules/keccak_sponge.v"/>
-          <Attr Name="ImportTime" Val="1792778848"/>
-          <Attr Name="UsedIn" Val="synthesis"/>
-          <Attr Name="UsedIn" Val="implementation"/>
-          <Attr Name="UsedIn" Val="simulation"/>
-        </FileInfo>
-      </File>
-      <File Path="$PSRCDIR/sources_1/imports/Implementation/rtl/modules/keccak_theta_rho_pi_stage.v">
-        <FileInfo>
-          <Attr Name="AutoDisabled" Val="1"/>
-          <Attr Name="ImportPath" Val="$PPRDIR/../../rtl/modules/keccak_theta_rho_pi_stage.v"/>
-          <Attr Name="ImportTime" Val="1792313296"/>
-          <Attr Name="UsedIn" Val="synthesis"/>
-          <Attr Name="UsedIn" Val="implementation"/>
-          <Attr Name="UsedIn" Val="simulation"/>
-        </FileInfo>
-      </File>
-      <File Path="$PSRCDIR/sources_1/imports/Implementation/rtl/modules/keccak_top_axi4stream.v">
-        <FileInfo>
-          <Attr Name="AutoDisabled" Val="1"/>
-          <Attr Name="ImportPath" Val="$PPRDIR/../../rtl/modules/keccak_top_axi4stream.v"/>
-          <Attr Name="ImportTime" Val="1792761321"/>
-          <Attr Name="UsedIn" Val="synthesis"/>
-          <Attr Name="UsedIn" Val="implementation"/>
-          <Attr Name="UsedIn" Val="simulation"/>
-        </FileInfo>
-      </File>
-      <File Path="$PSRCDIR/sources_1/imports/Implementation/rtl/modules/keccak_top_axi4stream_wrapper.v">
-        <FileInfo>
-          <Attr Name="AutoDisabled" Val="1"/>
-          <Attr Name="ImportPath" Val="$PPRDIR/../../rtl/modules/keccak_top_axi4stream_wrapper.v"/>
-          <Attr Name="ImportTime" Val="1792771505"/>
-          <Attr Name="UsedIn" Val="synthesis"/>
-          <Attr Name="UsedIn" Val="implementation"/>
-          <Attr Name="UsedIn" Val="simulation"/>
-        </FileInfo>
-      </File>
-      <File Path="$PPRDIR/../ip_repo/component.xml">
-        <FileInfo SFType="IPXACT"/>
-      </File>
       <File Path="$PSRCDIR/sources_1/bd/keccak_system/keccak_system.bd">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
           <Attr Name="UsedIn" Val="simulation"/>
         </FileInfo>
-        <CompFileExtendedInfo CompFileName="keccak_system.bd" FileRelPathName="ip/keccak_system_axi_dma_0_0_1/keccak_system_axi_dma_0_0.xci">
+        <CompFileExtendedInfo CompFileName="keccak_system.bd" FileRelPathName="ip/keccak_system_axi_dma_0_0/keccak_system_axi_dma_0_0.xci">
           <Proxy FileSetName="keccak_system_axi_dma_0_0"/>
         </CompFileExtendedInfo>
         <CompFileExtendedInfo CompFileName="keccak_system.bd" FileRelPathName="ip/keccak_system_keccak_core_0_0/keccak_system_keccak_core_0_0.xci">
@@ -199,13 +106,7 @@
         <CompFileExtendedInfo CompFileName="keccak_system.bd" FileRelPathName="ip/keccak_system_proc_sys_reset_0_0/keccak_system_proc_sys_reset_0_0.xci">
           <Proxy FileSetName="keccak_system_proc_sys_reset_0_0"/>
         </CompFileExtendedInfo>
-        <CompFileExtendedInfo CompFileName="keccak_system.bd" FileRelPathName="ip/keccak_system_smartconnect_0_0/keccak_system_smartconnect_0_0.xci">
-          <Proxy FileSetName="keccak_system_smartconnect_0_0"/>
-        </CompFileExtendedInfo>
-        <CompFileExtendedInfo CompFileName="keccak_system.bd" FileRelPathName="ip/keccak_system_smartconnect_1_0/keccak_system_smartconnect_1_0.xci">
-          <Proxy FileSetName="keccak_system_smartconnect_1_0"/>
-        </CompFileExtendedInfo>
-        <CompFileExtendedInfo CompFileName="keccak_system.bd" FileRelPathName="ip/keccak_system_zynq_ultra_ps_e_0_0_1/keccak_system_zynq_ultra_ps_e_0_0.xci">
+        <CompFileExtendedInfo CompFileName="keccak_system.bd" FileRelPathName="ip/keccak_system_zynq_ultra_ps_e_0_0/keccak_system_zynq_ultra_ps_e_0_0.xci">
           <Proxy FileSetName="keccak_system_zynq_ultra_ps_e_0_0"/>
         </CompFileExtendedInfo>
       </File>
@@ -219,6 +120,7 @@
       <Config>
         <Option Name="DesignMode" Val="RTL"/>
         <Option Name="TopModule" Val="keccak_system_wrapper"/>
+        <Option Name="VerilogDir" Val="$PPRDIR/../../rtl/utils"/>
       </Config>
     </FileSet>
     <FileSet Name="constrs_1" Type="Constrs" RelSrcDir="$PSRCDIR/constrs_1" RelGenDir="$PGENDIR/constrs_1">
@@ -229,11 +131,67 @@
     </FileSet>
     <FileSet Name="sim_1" Type="SimulationSrcs" RelSrcDir="$PSRCDIR/sim_1" RelGenDir="$PGENDIR/sim_1">
       <Filter Type="Srcs"/>
+      <File Path="$PPRDIR/../../rtl/utils/keccak_funcs.vh">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+          <Attr Name="IsVisible" Val="1"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../../rtl/utils/keccak_defs.vh">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+          <Attr Name="IsVisible" Val="1"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../../rtl/modules/keccak_pad_block.v">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="implementation"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../../rtl/modules/keccak_permutation.v">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="implementation"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../../rtl/modules/keccak_sponge.v">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="implementation"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../../rtl/modules/keccak_top.v">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="implementation"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../../rtl/modules/keccak_top_wrapper.v">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="implementation"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PPRDIR/../../testbench/keccak_soc_tb.v">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="synthesis"/>
+          <Attr Name="UsedIn" Val="implementation"/>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
       <Config>
         <Option Name="DesignMode" Val="RTL"/>
-        <Option Name="TopModule" Val="keccak_top_axi4stream_wrapper"/>
+        <Option Name="TopModule" Val="keccak_soc_tb"/>
         <Option Name="TopLib" Val="xil_defaultlib"/>
-        <Option Name="TopAutoSet" Val="TRUE"/>
+        <Option Name="VerilogDir" Val="$PPRDIR/../../rtl/utils"/>
         <Option Name="TransportPathDelay" Val="0"/>
         <Option Name="TransportIntDelay" Val="0"/>
         <Option Name="SelectedSimModel" Val="rtl"/>
@@ -241,7 +199,7 @@
         <Option Name="PamDutBypassFile" Val="xil_dut_bypass"/>
         <Option Name="PamSignalDriverFile" Val="xil_bypass_driver"/>
         <Option Name="PamPseudoTop" Val="pseudo_tb"/>
-        <Option Name="SrcSet" Val="sources_1"/>
+        <Option Name="SrcSet" Val=""/>
         <Option Name="CosimPdi" Val=""/>
         <Option Name="CosimPlatform" Val=""/>
         <Option Name="CosimElf" Val=""/>
@@ -254,17 +212,12 @@
         <Option Name="LogicalNoCTop" Val=""/>
         <Option Name="LogicalNoCTopLib" Val=""/>
         <Option Name="Dmv" Val=""/>
+        <Option Name="xsim.simulate.runtime" Val="all"/>
+        <Option Name="questa.simulate.vsim.more_options" Val="+VECTOR_DIR=/run/media/quan/Samsung/02_DuAn_LapTrinh/github-repo/keccak-mlkem/Implementation/vector"/>
       </Config>
     </FileSet>
     <FileSet Name="utils_1" Type="Utils" RelSrcDir="$PSRCDIR/utils_1" RelGenDir="$PGENDIR/utils_1">
       <Filter Type="Utils"/>
-      <File Path="$PSRCDIR/utils_1/imports/synth_1/keccak_system_wrapper.dcp">
-        <FileInfo>
-          <Attr Name="UsedIn" Val="synthesis"/>
-          <Attr Name="UsedIn" Val="implementation"/>
-          <Attr Name="AutoDcp" Val="1"/>
-        </FileInfo>
-      </File>
       <Config>
         <Option Name="TopAutoSet" Val="TRUE"/>
       </Config>
@@ -272,36 +225,28 @@
     <FileSet Name="keccak_system_zynq_ultra_ps_e_0_0" Type="BlockSrcs" RelSrcDir="$PSRCDIR/keccak_system_zynq_ultra_ps_e_0_0" RelGenDir="$PGENDIR/keccak_system_zynq_ultra_ps_e_0_0">
       <Config>
         <Option Name="TopModule" Val="keccak_system_zynq_ultra_ps_e_0_0"/>
-        <Option Name="UseBlackboxStub" Val="1"/>
-      </Config>
-    </FileSet>
-    <FileSet Name="keccak_system_keccak_core_0_0" Type="BlockSrcs" RelSrcDir="$PSRCDIR/keccak_system_keccak_core_0_0" RelGenDir="$PGENDIR/keccak_system_keccak_core_0_0">
-      <Config>
-        <Option Name="TopModule" Val="keccak_system_keccak_core_0_0"/>
-        <Option Name="UseBlackboxStub" Val="1"/>
-      </Config>
-    </FileSet>
-    <FileSet Name="keccak_system_axi_dma_0_0" Type="BlockSrcs" RelSrcDir="$PSRCDIR/keccak_system_axi_dma_0_0" RelGenDir="$PGENDIR/keccak_system_axi_dma_0_0">
-      <Config>
-        <Option Name="TopModule" Val="keccak_system_axi_dma_0_0"/>
+        <Option Name="VerilogDir" Val="$PPRDIR/../../rtl/utils"/>
         <Option Name="UseBlackboxStub" Val="1"/>
       </Config>
     </FileSet>
     <FileSet Name="keccak_system_proc_sys_reset_0_0" Type="BlockSrcs" RelSrcDir="$PSRCDIR/keccak_system_proc_sys_reset_0_0" RelGenDir="$PGENDIR/keccak_system_proc_sys_reset_0_0">
       <Config>
         <Option Name="TopModule" Val="keccak_system_proc_sys_reset_0_0"/>
+        <Option Name="VerilogDir" Val="$PPRDIR/../../rtl/utils"/>
         <Option Name="UseBlackboxStub" Val="1"/>
       </Config>
     </FileSet>
-    <FileSet Name="keccak_system_smartconnect_0_0" Type="BlockSrcs" RelSrcDir="$PSRCDIR/keccak_system_smartconnect_0_0" RelGenDir="$PGENDIR/keccak_system_smartconnect_0_0">
+    <FileSet Name="keccak_system_axi_dma_0_0" Type="BlockSrcs" RelSrcDir="$PSRCDIR/keccak_system_axi_dma_0_0" RelGenDir="$PGENDIR/keccak_system_axi_dma_0_0">
       <Config>
-        <Option Name="TopModule" Val="keccak_system_smartconnect_0_0"/>
+        <Option Name="TopModule" Val="keccak_system_axi_dma_0_0"/>
+        <Option Name="VerilogDir" Val="$PPRDIR/../../rtl/utils"/>
         <Option Name="UseBlackboxStub" Val="1"/>
       </Config>
     </FileSet>
-    <FileSet Name="keccak_system_smartconnect_1_0" Type="BlockSrcs" RelSrcDir="$PSRCDIR/keccak_system_smartconnect_1_0" RelGenDir="$PGENDIR/keccak_system_smartconnect_1_0">
+    <FileSet Name="keccak_system_keccak_core_0_0" Type="BlockSrcs" RelSrcDir="$PSRCDIR/keccak_system_keccak_core_0_0" RelGenDir="$PGENDIR/keccak_system_keccak_core_0_0">
       <Config>
-        <Option Name="TopModule" Val="keccak_system_smartconnect_1_0"/>
+        <Option Name="TopModule" Val="keccak_system_keccak_core_0_0"/>
+        <Option Name="VerilogDir" Val="$PPRDIR/../../rtl/utils"/>
         <Option Name="UseBlackboxStub" Val="1"/>
       </Config>
     </FileSet>
@@ -348,7 +293,7 @@
       <Report Name="ROUTE_DESIGN.REPORT_METHODOLOGY" Enabled="1"/>
       <RQSFiles/>
     </Run>
-    <Run Id="keccak_system_keccak_core_0_0_synth_1" Type="Ft3:Synth" SrcSet="keccak_system_keccak_core_0_0" Part="xck26-sfvc784-2LV-c" ConstrsSet="keccak_system_keccak_core_0_0" Description="Vivado Synthesis Defaults" AutoIncrementalCheckpoint="false" WriteIncrSynthDcp="false" Dir="$PRUNDIR/keccak_system_keccak_core_0_0_synth_1" IncludeInArchive="true" IsChild="false" AutoIncrementalDir="$PSRCDIR/utils_1/imports/keccak_system_keccak_core_0_0_synth_1" AutoRQSDir="$PSRCDIR/utils_1/imports/keccak_system_keccak_core_0_0_synth_1" ParallelReportGen="true">
+    <Run Id="keccak_system_proc_sys_reset_0_0_synth_1" Type="Ft3:Synth" SrcSet="keccak_system_proc_sys_reset_0_0" Part="xck26-sfvc784-2LV-c" ConstrsSet="keccak_system_proc_sys_reset_0_0" Description="Vivado Synthesis Defaults" AutoIncrementalCheckpoint="false" WriteIncrSynthDcp="false" Dir="$PRUNDIR/keccak_system_proc_sys_reset_0_0_synth_1" IncludeInArchive="true" IsChild="false" AutoIncrementalDir="$PSRCDIR/utils_1/imports/keccak_system_proc_sys_reset_0_0_synth_1" AutoRQSDir="$PSRCDIR/utils_1/imports/keccak_system_proc_sys_reset_0_0_synth_1" ParallelReportGen="true">
       <Strategy Version="1" Minor="2">
         <StratHandle Name="Vivado Synthesis Defaults" Flow="Vivado Synthesis 2025"/>
         <Step Id="synth_design"/>
@@ -368,29 +313,7 @@
       <Report Name="ROUTE_DESIGN.REPORT_METHODOLOGY" Enabled="1"/>
       <RQSFiles/>
     </Run>
-    <Run Id="keccak_system_proc_sys_reset_0_0_synth_1" Type="Ft3:Synth" SrcSet="keccak_system_proc_sys_reset_0_0" Part="xck26-sfvc784-2LV-c" ConstrsSet="keccak_system_proc_sys_reset_0_0" Description="Vivado Synthesis Defaults" AutoIncrementalCheckpoint="false" WriteIncrSynthDcp="false" Dir="$PRUNDIR/keccak_system_proc_sys_reset_0_0_synth_1" IncludeInArchive="true" IsChild="false" AutoIncrementalDir="$PSRCDIR/utils_1/imports/keccak_system_proc_sys_reset_0_0_synth_1" AutoRQSDir="$PSRCDIR/utils_1/imports/keccak_system_proc_sys_reset_0_0_synth_1" ParallelReportGen="true">
-      <Strategy Version="1" Minor="2">
-        <StratHandle Name="Vivado Synthesis Defaults" Flow="Vivado Synthesis 2025"/>
-        <Step Id="synth_design"/>
-      </Strategy>
-      <GeneratedRun Dir="$PRUNDIR" File="gen_run.xml"/>
-      <ReportStrategy Name="Vivado Synthesis Default Reports" Flow="Vivado Synthesis 2025"/>
-      <Report Name="ROUTE_DESIGN.REPORT_METHODOLOGY" Enabled="1"/>
-      <RQSFiles/>
-    </Run>
-    <Run Id="keccak_system_smartconnect_0_0_synth_1" Type="Ft3:Synth" SrcSet="keccak_system_smartconnect_0_0" Part="xck26-sfvc784-2LV-c" ConstrsSet="keccak_system_smartconnect_0_0" Description="Vivado Synthesis Defaults" AutoIncrementalCheckpoint="false" WriteIncrSynthDcp="false" Dir="$PRUNDIR/keccak_system_smartconnect_0_0_synth_1" IncludeInArchive="true" IsChild="false" AutoIncrementalDir="$PSRCDIR/utils_1/imports/keccak_system_smartconnect_0_0_synth_1" AutoRQSDir="$PSRCDIR/utils_1/imports/keccak_system_smartconnect_0_0_synth_1" ParallelReportGen="true">
-      <Strategy Version="1" Minor="2">
-        <StratHandle Name="Vivado Synthesis Defaults" Flow="Vivado Synthesis 2025">
-          <Desc>Vivado Synthesis Defaults</Desc>
-        </StratHandle>
-        <Step Id="synth_design"/>
-      </Strategy>
-      <GeneratedRun Dir="$PRUNDIR" File="gen_run.xml"/>
-      <ReportStrategy Name="Vivado Synthesis Default Reports" Flow="Vivado Synthesis 2025"/>
-      <Report Name="ROUTE_DESIGN.REPORT_METHODOLOGY" Enabled="1"/>
-      <RQSFiles/>
-    </Run>
-    <Run Id="keccak_system_smartconnect_1_0_synth_1" Type="Ft3:Synth" SrcSet="keccak_system_smartconnect_1_0" Part="xck26-sfvc784-2LV-c" ConstrsSet="keccak_system_smartconnect_1_0" Description="Vivado Synthesis Defaults" AutoIncrementalCheckpoint="false" WriteIncrSynthDcp="false" Dir="$PRUNDIR/keccak_system_smartconnect_1_0_synth_1" IncludeInArchive="true" IsChild="false" AutoIncrementalDir="$PSRCDIR/utils_1/imports/keccak_system_smartconnect_1_0_synth_1" AutoRQSDir="$PSRCDIR/utils_1/imports/keccak_system_smartconnect_1_0_synth_1" ParallelReportGen="true">
+    <Run Id="keccak_system_keccak_core_0_0_synth_1" Type="Ft3:Synth" SrcSet="keccak_system_keccak_core_0_0" Part="xck26-sfvc784-2LV-c" ConstrsSet="keccak_system_keccak_core_0_0" Description="Vivado Synthesis Defaults" AutoIncrementalCheckpoint="false" WriteIncrSynthDcp="false" Dir="$PRUNDIR/keccak_system_keccak_core_0_0_synth_1" IncludeInArchive="true" IsChild="false" AutoIncrementalDir="$PSRCDIR/utils_1/imports/keccak_system_keccak_core_0_0_synth_1" AutoRQSDir="$PSRCDIR/utils_1/imports/keccak_system_keccak_core_0_0_synth_1" ParallelReportGen="true">
       <Strategy Version="1" Minor="2">
         <StratHandle Name="Vivado Synthesis Defaults" Flow="Vivado Synthesis 2025">
           <Desc>Vivado Synthesis Defaults</Desc>
@@ -437,7 +360,7 @@
       <Report Name="ROUTE_DESIGN.REPORT_METHODOLOGY" Enabled="1"/>
       <RQSFiles/>
     </Run>
-    <Run Id="keccak_system_keccak_core_0_0_impl_1" Type="Ft2:EntireDesign" Part="xck26-sfvc784-2LV-c" ConstrsSet="keccak_system_keccak_core_0_0" Description="Default settings for Implementation." AutoIncrementalCheckpoint="false" WriteIncrSynthDcp="false" SynthRun="keccak_system_keccak_core_0_0_synth_1" IncludeInArchive="false" IsChild="false" GenFullBitstream="true" AutoIncrementalDir="$PSRCDIR/utils_1/imports/keccak_system_keccak_core_0_0_impl_1" AutoRQSDir="$PSRCDIR/utils_1/imports/keccak_system_keccak_core_0_0_impl_1" ParallelReportGen="true">
+    <Run Id="keccak_system_proc_sys_reset_0_0_impl_1" Type="Ft2:EntireDesign" Part="xck26-sfvc784-2LV-c" ConstrsSet="keccak_system_proc_sys_reset_0_0" Description="Default settings for Implementation." AutoIncrementalCheckpoint="false" WriteIncrSynthDcp="false" SynthRun="keccak_system_proc_sys_reset_0_0_synth_1" IncludeInArchive="false" IsChild="false" GenFullBitstream="true" AutoIncrementalDir="$PSRCDIR/utils_1/imports/keccak_system_proc_sys_reset_0_0_impl_1" AutoRQSDir="$PSRCDIR/utils_1/imports/keccak_system_proc_sys_reset_0_0_impl_1" ParallelReportGen="true">
       <Strategy Version="1" Minor="2">
         <StratHandle Name="Vivado Implementation Defaults" Flow="Vivado Implementation 2025"/>
         <Step Id="init_design"/>
@@ -471,43 +394,7 @@
       <Report Name="ROUTE_DESIGN.REPORT_METHODOLOGY" Enabled="1"/>
       <RQSFiles/>
     </Run>
-    <Run Id="keccak_system_proc_sys_reset_0_0_impl_1" Type="Ft2:EntireDesign" Part="xck26-sfvc784-2LV-c" ConstrsSet="keccak_system_proc_sys_reset_0_0" Description="Default settings for Implementation." AutoIncrementalCheckpoint="false" WriteIncrSynthDcp="false" SynthRun="keccak_system_proc_sys_reset_0_0_synth_1" IncludeInArchive="false" IsChild="false" GenFullBitstream="true" AutoIncrementalDir="$PSRCDIR/utils_1/imports/keccak_system_proc_sys_reset_0_0_impl_1" AutoRQSDir="$PSRCDIR/utils_1/imports/keccak_system_proc_sys_reset_0_0_impl_1" ParallelReportGen="true">
-      <Strategy Version="1" Minor="2">
-        <StratHandle Name="Vivado Implementation Defaults" Flow="Vivado Implementation 2025"/>
-        <Step Id="init_design"/>
-        <Step Id="opt_design"/>
-        <Step Id="power_opt_design"/>
-        <Step Id="place_design"/>
-        <Step Id="post_place_power_opt_design"/>
-        <Step Id="phys_opt_design"/>
-        <Step Id="route_design"/>
-        <Step Id="post_route_phys_opt_design"/>
-        <Step Id="write_bitstream"/>
-      </Strategy>
-      <ReportStrategy Name="Vivado Implementation Default Reports" Flow="Vivado Implementation 2025"/>
-      <Report Name="ROUTE_DESIGN.REPORT_METHODOLOGY" Enabled="1"/>
-      <RQSFiles/>
-    </Run>
-    <Run Id="keccak_system_smartconnect_0_0_impl_1" Type="Ft2:EntireDesign" Part="xck26-sfvc784-2LV-c" ConstrsSet="keccak_system_smartconnect_0_0" Description="Default settings for Implementation." AutoIncrementalCheckpoint="false" WriteIncrSynthDcp="false" SynthRun="keccak_system_smartconnect_0_0_synth_1" IncludeInArchive="false" IsChild="false" GenFullBitstream="true" AutoIncrementalDir="$PSRCDIR/utils_1/imports/keccak_system_smartconnect_0_0_impl_1" AutoRQSDir="$PSRCDIR/utils_1/imports/keccak_system_smartconnect_0_0_impl_1" ParallelReportGen="true">
-      <Strategy Version="1" Minor="2">
-        <StratHandle Name="Vivado Implementation Defaults" Flow="Vivado Implementation 2025">
-          <Desc>Default settings for Implementation.</Desc>
-        </StratHandle>
-        <Step Id="init_design"/>
-        <Step Id="opt_design"/>
-        <Step Id="power_opt_design"/>
-        <Step Id="place_design"/>
-        <Step Id="post_place_power_opt_design"/>
-        <Step Id="phys_opt_design"/>
-        <Step Id="route_design"/>
-        <Step Id="post_route_phys_opt_design"/>
-        <Step Id="write_bitstream"/>
-      </Strategy>
-      <ReportStrategy Name="Vivado Implementation Default Reports" Flow="Vivado Implementation 2025"/>
-      <Report Name="ROUTE_DESIGN.REPORT_METHODOLOGY" Enabled="1"/>
-      <RQSFiles/>
-    </Run>
-    <Run Id="keccak_system_smartconnect_1_0_impl_1" Type="Ft2:EntireDesign" Part="xck26-sfvc784-2LV-c" ConstrsSet="keccak_system_smartconnect_1_0" Description="Default settings for Implementation." AutoIncrementalCheckpoint="false" WriteIncrSynthDcp="false" SynthRun="keccak_system_smartconnect_1_0_synth_1" IncludeInArchive="false" IsChild="false" GenFullBitstream="true" AutoIncrementalDir="$PSRCDIR/utils_1/imports/keccak_system_smartconnect_1_0_impl_1" AutoRQSDir="$PSRCDIR/utils_1/imports/keccak_system_smartconnect_1_0_impl_1" ParallelReportGen="true">
+    <Run Id="keccak_system_keccak_core_0_0_impl_1" Type="Ft2:EntireDesign" Part="xck26-sfvc784-2LV-c" ConstrsSet="keccak_system_keccak_core_0_0" Description="Default settings for Implementation." AutoIncrementalCheckpoint="false" WriteIncrSynthDcp="false" SynthRun="keccak_system_keccak_core_0_0_synth_1" IncludeInArchive="false" IsChild="false" GenFullBitstream="true" AutoIncrementalDir="$PSRCDIR/utils_1/imports/keccak_system_keccak_core_0_0_impl_1" AutoRQSDir="$PSRCDIR/utils_1/imports/keccak_system_keccak_core_0_0_impl_1" ParallelReportGen="true">
       <Strategy Version="1" Minor="2">
         <StratHandle Name="Vivado Implementation Defaults" Flow="Vivado Implementation 2025">
           <Desc>Default settings for Implementation.</Desc>
@@ -540,111 +427,6 @@
     <MsgAttr Name="Note" Val=""/>
     <MsgAttr Name="Author" Val=""/>
     <MsgAttr Name="CreatedTimestamp" Val=""/>
-  </MsgRule>
-  <MsgRule>
-    <MsgAttr Name="RuleType" Val="1"/>
-    <MsgAttr Name="Limit" Val="-1"/>
-    <MsgAttr Name="NewSeverity" Val="INFO"/>
-    <MsgAttr Name="Id" Val="Synth 8-689"/>
-    <MsgAttr Name="Severity" Val="ANY"/>
-    <MsgAttr Name="ShowRule" Val="1"/>
-    <MsgAttr Name="RuleSource" Val="2"/>
-    <MsgAttr Name="StringIsRegExp" Val="1"/>
-    <MsgAttr Name="RuleId" Val="10"/>
-    <MsgAttr Name="Note" Val=""/>
-    <MsgAttr Name="Author" Val=""/>
-    <MsgAttr Name="CreatedTimestamp" Val=""/>
-    <MsgAttr Name="StringsToMatch" Val=".*port connection &apos;EMIOSDIO[01]DATA(IN|OUT|ENA)&apos; .* module &apos;PS8&apos;.*"/>
-  </MsgRule>
-  <MsgRule>
-    <MsgAttr Name="RuleType" Val="1"/>
-    <MsgAttr Name="Limit" Val="-1"/>
-    <MsgAttr Name="NewSeverity" Val="INFO"/>
-    <MsgAttr Name="Id" Val="Synth 8-7071"/>
-    <MsgAttr Name="Severity" Val="ANY"/>
-    <MsgAttr Name="ShowRule" Val="1"/>
-    <MsgAttr Name="RuleSource" Val="2"/>
-    <MsgAttr Name="StringIsRegExp" Val="1"/>
-    <MsgAttr Name="RuleId" Val="11"/>
-    <MsgAttr Name="Note" Val=""/>
-    <MsgAttr Name="Author" Val=""/>
-    <MsgAttr Name="CreatedTimestamp" Val=""/>
-    <MsgAttr Name="StringsToMatch" Val=".*port &apos;PSS_ALTO_CORE_PAD_[^&apos;]+&apos; of module &apos;PS8&apos; is unconnected for instance &apos;PS8_i&apos;.*"/>
-  </MsgRule>
-  <MsgRule>
-    <MsgAttr Name="RuleType" Val="1"/>
-    <MsgAttr Name="Limit" Val="-1"/>
-    <MsgAttr Name="NewSeverity" Val="INFO"/>
-    <MsgAttr Name="Id" Val="Synth 8-7023"/>
-    <MsgAttr Name="Severity" Val="ANY"/>
-    <MsgAttr Name="ShowRule" Val="1"/>
-    <MsgAttr Name="RuleSource" Val="2"/>
-    <MsgAttr Name="StringIsRegExp" Val="1"/>
-    <MsgAttr Name="RuleId" Val="12"/>
-    <MsgAttr Name="Note" Val=""/>
-    <MsgAttr Name="Author" Val=""/>
-    <MsgAttr Name="CreatedTimestamp" Val=""/>
-    <MsgAttr Name="StringsToMatch" Val=".*instance &apos;PS8_i&apos; of module &apos;PS8&apos; has 1015 connections declared, but only 957 given.*"/>
-  </MsgRule>
-  <MsgRule>
-    <MsgAttr Name="RuleType" Val="1"/>
-    <MsgAttr Name="Limit" Val="-1"/>
-    <MsgAttr Name="NewSeverity" Val="INFO"/>
-    <MsgAttr Name="Id" Val="Synth 8-3848"/>
-    <MsgAttr Name="Severity" Val="ANY"/>
-    <MsgAttr Name="ShowRule" Val="1"/>
-    <MsgAttr Name="RuleSource" Val="2"/>
-    <MsgAttr Name="StringIsRegExp" Val="1"/>
-    <MsgAttr Name="RuleId" Val="13"/>
-    <MsgAttr Name="Note" Val=""/>
-    <MsgAttr Name="Author" Val=""/>
-    <MsgAttr Name="CreatedTimestamp" Val=""/>
-    <MsgAttr Name="StringsToMatch" Val=".*Net (dp_audio_ref_clk|irq_ipi_pl_[0-3]|ps_pl_irq_usb3_[01]_otg) in module/entity zynq_ultra_ps_e_v3_5_8_zynq_ultra_ps_e does not have driver.*"/>
-  </MsgRule>
-  <MsgRule>
-    <MsgAttr Name="RuleType" Val="1"/>
-    <MsgAttr Name="Limit" Val="-1"/>
-    <MsgAttr Name="NewSeverity" Val="INFO"/>
-    <MsgAttr Name="Id" Val="Synth 8-3917"/>
-    <MsgAttr Name="Severity" Val="ANY"/>
-    <MsgAttr Name="ShowRule" Val="1"/>
-    <MsgAttr Name="RuleSource" Val="2"/>
-    <MsgAttr Name="StringIsRegExp" Val="1"/>
-    <MsgAttr Name="RuleId" Val="14"/>
-    <MsgAttr Name="Note" Val=""/>
-    <MsgAttr Name="Author" Val=""/>
-    <MsgAttr Name="CreatedTimestamp" Val=""/>
-    <MsgAttr Name="StringsToMatch" Val=".*design keccak_top_axi4stream__GB[0-9]+ has port (P|O[0-9]+)\[[0-9]+\] driven by constant 0.*"/>
-  </MsgRule>
-  <MsgRule>
-    <MsgAttr Name="RuleType" Val="1"/>
-    <MsgAttr Name="Limit" Val="-1"/>
-    <MsgAttr Name="NewSeverity" Val="INFO"/>
-    <MsgAttr Name="Id" Val="Board 49-26"/>
-    <MsgAttr Name="Severity" Val="ANY"/>
-    <MsgAttr Name="ShowRule" Val="1"/>
-    <MsgAttr Name="RuleSource" Val="2"/>
-    <MsgAttr Name="StringIsRegExp" Val="1"/>
-    <MsgAttr Name="RuleId" Val="8"/>
-    <MsgAttr Name="Note" Val=""/>
-    <MsgAttr Name="Author" Val=""/>
-    <MsgAttr Name="CreatedTimestamp" Val=""/>
-    <MsgAttr Name="StringsToMatch" Val=".*cannot add Board Part xilinx.com:(?!kv260_som:|kv260_carrier:)[^ ]+.*"/>
-  </MsgRule>
-  <MsgRule>
-    <MsgAttr Name="RuleType" Val="1"/>
-    <MsgAttr Name="Limit" Val="-1"/>
-    <MsgAttr Name="NewSeverity" Val="INFO"/>
-    <MsgAttr Name="Id" Val="Synth 8-6014"/>
-    <MsgAttr Name="Severity" Val="ANY"/>
-    <MsgAttr Name="ShowRule" Val="1"/>
-    <MsgAttr Name="RuleSource" Val="2"/>
-    <MsgAttr Name="StringIsRegExp" Val="1"/>
-    <MsgAttr Name="RuleId" Val="9"/>
-    <MsgAttr Name="Note" Val=""/>
-    <MsgAttr Name="Author" Val=""/>
-    <MsgAttr Name="CreatedTimestamp" Val=""/>
-    <MsgAttr Name="StringsToMatch" Val=".*Unused sequential element .*xpm_(memory|fifo)\.sv:.*"/>
   </MsgRule>
   <Board>
     <Jumpers/>
