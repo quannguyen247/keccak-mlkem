@@ -19,3 +19,9 @@
 
 _ide/logs
 _ide/.wsdata
+# Vitis IDE state and generated build files
+_ide/workspace_journal*.py
+_ide/.peers.ini
+.rigel_lopper/
+compile_commands.json
+**/build_configs/
