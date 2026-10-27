@@ -46,6 +46,8 @@ module keccak_sponge #(
     reg [BLOCK_WIDTH-1:0] squeeze_left_reg;
     reg xof_stream_reg;           
     reg absorb_last_reg;
+    reg absorb_mid_en_reg; // rate > 576 bits (all modes except SHA3-512)
+    reg absorb_hi_en_reg;  // rate > 1088 bits (SHAKE128 only)
 
     // Rate-masked datapath
     reg [`KECCAK_STATE_WIDTH-1:0] absorb_block;
@@ -93,18 +95,12 @@ module keccak_sponge #(
     // Absorb mask
     always @(*) begin
         absorb_block = {`KECCAK_STATE_WIDTH{1'b0}};
+        absorb_block[`SHA3_512_RATE_BITS-1:0] = absorb_in[`SHA3_512_RATE_BITS-1:0];
 
-        case (mode_reg)
-            `KECCAK_MODE_SHAKE128: begin
-                absorb_block[`SHAKE128_RATE_BITS-1:0] = absorb_in[`SHAKE128_RATE_BITS-1:0];
-            end
-            `KECCAK_MODE_SHA3_512: begin
-                absorb_block[`SHA3_512_RATE_BITS-1:0] = absorb_in[`SHA3_512_RATE_BITS-1:0];
-            end
-            default: begin
-                absorb_block[`SHAKE256_RATE_BITS-1:0] = absorb_in[`SHAKE256_RATE_BITS-1:0];
-            end
-        endcase
+        if (absorb_mid_en_reg)
+            absorb_block[`SHAKE256_RATE_BITS-1:`SHA3_512_RATE_BITS] = absorb_in[`SHAKE256_RATE_BITS-1:`SHA3_512_RATE_BITS];
+        if (absorb_hi_en_reg)
+            absorb_block[`SHAKE128_RATE_BITS-1:`SHAKE256_RATE_BITS] = absorb_in[`SHAKE128_RATE_BITS-1:`SHAKE256_RATE_BITS];
     end
 
     // Squeeze mask
@@ -131,6 +127,8 @@ module keccak_sponge #(
     always @(posedge clk) begin
         if (!rst_n) begin
             mode_reg <= `KECCAK_MODE_SHAKE256;
+            absorb_mid_en_reg <= 1'b1;
+            absorb_hi_en_reg <= 1'b0;
             curr_state <= ST_IDLE;
         end else begin
             curr_state <= next_state;
@@ -138,6 +136,8 @@ module keccak_sponge #(
                 ST_IDLE: begin
                     if (start) begin
                         mode_reg <= mode;
+                        absorb_mid_en_reg <= (mode != `KECCAK_MODE_SHA3_512);
+                        absorb_hi_en_reg <= (mode == `KECCAK_MODE_SHAKE128);
                         squeeze_left_reg <= keccak_is_xof(mode) ? output_blocks : 1;
                         xof_stream_reg <= keccak_is_xof(mode) && (output_blocks == 0);
                     end
