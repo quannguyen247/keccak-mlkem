@@ -53,7 +53,8 @@ module keccak_sponge #(
 
     // Absorb/squeeze handshake flags
     wire absorb_fire = (curr_state == ST_ABSORB) && absorb_valid;
-    wire squeeze_fire = (curr_state == ST_SQUEEZE) && squeeze_ready;
+    wire squeeze_more = xof_stream_reg || (squeeze_left_reg > 0);
+    wire squeeze_fire = (curr_state == ST_SQUEEZE) && squeeze_ready && squeeze_more;
     wire squeeze_end = (xof_stream_reg && squeeze_last) || (!xof_stream_reg && squeeze_left_reg == 1);
 
     // Keccak permutation interface
@@ -81,7 +82,7 @@ module keccak_sponge #(
                 next_state = ST_PERMUTE;
             ST_START: next_state = ST_PERMUTE;
             ST_PERMUTE: if (perm_last)
-                next_state = absorb_last_reg ? ST_SQUEEZE : ST_ABSORB;
+                next_state = !absorb_last_reg ? ST_ABSORB : (squeeze_more ? ST_SQUEEZE : ST_DONE);
             ST_SQUEEZE: if (squeeze_fire)
                 next_state = squeeze_end ? ST_DONE : ST_START;
             ST_DONE: next_state = ST_IDLE;
@@ -155,7 +156,7 @@ module keccak_sponge #(
     end
 
     assign absorb_ready = (curr_state == ST_ABSORB);
-    assign squeeze_valid = (curr_state == ST_SQUEEZE);
+    assign squeeze_valid = (curr_state == ST_SQUEEZE) && squeeze_more;
     assign squeeze_out = squeeze_data;
     assign squeeze_bytes = keccak_output_bytes(mode_reg);
     assign done = (curr_state == ST_DONE);
