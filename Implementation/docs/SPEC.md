@@ -362,13 +362,13 @@ wrapper ports:
 | `u_pc_in` | `axis_protocol_checker_0` (AXI4-Stream Protocol Checker) | `s_axis_dma` | 8-byte `TDATA`, `TKEEP`, `TLAST`, `TREADY` |
 | `u_pc_out` | `axis_protocol_checker_0` | `m_axis_dma` | Same as `u_pc_in` |
 
-The IPs live in `Implementation/project/keccak_soc` and are marked for
-simulation only. They are not in the block design, so they do not change the
-synthesis or implementation results. Wait-limit checks (`MAX_*_WAITS`) are
-disabled. `pc_status` and `pc_asserted` are left unconnected: a violation is
-printed as an `ERROR` line in the simulator log and is not part of the
-testbench pass count. Because of these IPs, `keccak_soc_tb.v` needs the Vivado
-simulator.
+Both SoC projects include the IPs for simulation only. They are not in the
+block design, so they do not change the synthesis or implementation results.
+Wait-limit checks (`MAX_*_WAITS`) are disabled. `pc_status` and `pc_asserted`
+are left unconnected: a violation is printed as an `ERROR` line in the
+simulator log and is not part of the testbench pass count. The testbench needs
+a simulator that can compile the generated AMD checker models; it has also
+been run with QuestaSim.
 
 The local parameter `FAULT_CASE` (default `-1`, off) selects one case for
 fault injection. In that case the testbench forces `s_axis_dma_tready` low for

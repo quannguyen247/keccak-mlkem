@@ -131,7 +131,7 @@ module keccak_soc_tb;
 
     initial begin
         aclk = 1'b0;
-        forever #5 aclk = ~aclk;
+        forever #2.5 aclk = ~aclk;
     end
 
     // Return the folder part of a file path, used to locate the vector folder

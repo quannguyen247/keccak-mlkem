@@ -1,0 +1,5 @@
+tv_count=150
+max_msg_bytes=400
+max_out_bytes=400
+base_cases=72
+random_cases=78

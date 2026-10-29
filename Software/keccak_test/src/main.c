@@ -95,7 +95,7 @@ int main(void)
             break;
     }
 
-    // Invalidate CPU cache to read fresh hash digest directly from DDR RAM
+    // Invalidate CPU cache to read latest hash output directly from DDR RAM
     Xil_DCacheInvalidateRange((UINTPTR)out, 64);
 
     // Print output and compare each byte with reference hex string

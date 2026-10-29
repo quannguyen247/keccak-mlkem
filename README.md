@@ -41,8 +41,8 @@ context and are listed separately in the [specification](Implementation/docs/SPE
 | [`Implementation/vector/`](Implementation/vector/) | `keccak_vector.py`, the golden-vector generator shared by both testbenches |
 | [`Implementation/constraint/`](Implementation/constraint/) | 5 ns clock constraint for the standalone build |
 | [`Implementation/project/keccak_ip/`](Implementation/project/keccak_ip/) | Artix-7 out-of-context project for `keccak_top` |
-| [`Implementation/project/keccak_soc/`](Implementation/project/keccak_soc/) | KV260 block design without debug cores; also holds the simulation-only AXI protocol checker IPs used by `keccak_soc_tb.v` |
-| [`Implementation/project/keccak_soc_ila/`](Implementation/project/keccak_soc_ila/) | KV260 block design with a System ILA; its XSA feeds the Vitis platform |
+| [`Implementation/project/keccak_soc/`](Implementation/project/keccak_soc/) | KV260 block design without debug cores; includes simulation-only AXI protocol checker IPs used by `keccak_soc_tb.v` |
+| [`Implementation/project/keccak_soc_ila/`](Implementation/project/keccak_soc_ila/) | KV260 block design with a System ILA and the same simulation checkers; its XSA feeds the Vitis platform |
 | [`Implementation/project/ip_repo/keccak_core/`](Implementation/project/ip_repo/keccak_core/) | Packaged IP `quannguyen247.org:user:keccak_core:1.0` |
 | [`Implementation/docs/SPEC.md`](Implementation/docs/SPEC.md) | IP technical specification and register map |
 | [`Software/`](Software/) | Vitis 2025.2 workspace: KV260 platform and the `keccak_test` bare-metal app |
@@ -55,13 +55,20 @@ context and are listed separately in the [specification](Implementation/docs/SPE
 | `keccak_top.v` | Native core: padding and sponge |
 | `keccak_top_wrapper.v` | AXI4-Lite registers and AXI4-Stream ports for DMA use |
 
-Vivado run directories, generated vectors and Vitis build output are not
-tracked. Rebuild them after changing RTL, constraints or software.
+Vivado run directories and Vitis build output are not tracked. Rebuild them
+after changing RTL, constraints or software.
+The SoC projects include their block designs, IP configurations and checker
+simulation manifests, so their XPR files can be opened from a fresh clone.
+Vivado 2025.2.1 regenerates the remaining IP outputs locally on first use;
+this requires the KV260 part, board files and the standard Vivado IP catalog.
+When checker outputs are regenerated, their tracked manifests may change their
+generation timestamps.
 
 ## Test and build
 
-Generate the vectors, then run both testbenches. The testbenches find the
-vector files relative to their own path.
+The repository includes 150 test vectors, so both testbenches can run after a
+fresh clone. The testbenches find the vector files relative to their own path.
+To regenerate the default set or choose a different number of cases:
 
 ```sh
 cd Implementation

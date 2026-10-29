@@ -170,7 +170,6 @@
         <Option Name="LogicalNoCTopLib" Val=""/>
         <Option Name="Dmv" Val=""/>
         <Option Name="xsim.simulate.runtime" Val="all"/>
-        <Option Name="questa.simulate.vsim.more_options" Val="+VECTOR_DIR=/run/media/quan/Samsung/02_DuAn_LapTrinh/github-repo/keccak-mlkem/Implementation/vector"/>
       </Config>
     </FileSet>
     <FileSet Name="utils_1" Type="Utils" RelSrcDir="$PSRCDIR/utils_1" RelGenDir="$PGENDIR/utils_1">

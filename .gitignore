@@ -14,10 +14,48 @@ __pycache__/
 *.cache/
 *.hw/
 *.gen/
+# Vivado needs these checker manifests when it builds the first simulation
+# compile order. The checker HDL itself is generated locally.
+!Implementation/project/keccak_soc/keccak_soc.gen/
+!Implementation/project/keccak_soc_ila/keccak_soc_ila.gen/
+/Implementation/project/keccak_soc*/keccak_soc*.gen/*
+!/Implementation/project/keccak_soc*/keccak_soc*.gen/sources_1/
+/Implementation/project/keccak_soc*/keccak_soc*.gen/sources_1/*
+!/Implementation/project/keccak_soc*/keccak_soc*.gen/sources_1/ip/
+/Implementation/project/keccak_soc*/keccak_soc*.gen/sources_1/ip/*
+!/Implementation/project/keccak_soc*/keccak_soc*.gen/sources_1/ip/axi_protocol_checker_0/
+!/Implementation/project/keccak_soc*/keccak_soc*.gen/sources_1/ip/axis_protocol_checker_0/
+/Implementation/project/keccak_soc*/keccak_soc*.gen/sources_1/ip/*/*
+!/Implementation/project/keccak_soc*/keccak_soc*.gen/sources_1/ip/axi_protocol_checker_0/axi_protocol_checker_0.xml
+!/Implementation/project/keccak_soc*/keccak_soc*.gen/sources_1/ip/axis_protocol_checker_0/axis_protocol_checker_0.xml
 *.ip_user_files/
 *.runs/
 *.sim/
 *.srcs/
+# Keep the block design and IP configurations needed by each SoC
+# project. Generated IP products and other project state remain ignored.
+!Implementation/project/keccak_soc/keccak_soc.srcs/
+!Implementation/project/keccak_soc_ila/keccak_soc_ila.srcs/
+/Implementation/project/keccak_soc*/keccak_soc*.srcs/*
+!/Implementation/project/keccak_soc*/keccak_soc*.srcs/sources_1/
+/Implementation/project/keccak_soc*/keccak_soc*.srcs/sources_1/*
+!/Implementation/project/keccak_soc*/keccak_soc*.srcs/sources_1/bd/
+/Implementation/project/keccak_soc*/keccak_soc*.srcs/sources_1/bd/*
+!/Implementation/project/keccak_soc*/keccak_soc*.srcs/sources_1/bd/keccak_system/
+/Implementation/project/keccak_soc*/keccak_soc*.srcs/sources_1/bd/keccak_system/*
+!/Implementation/project/keccak_soc*/keccak_soc*.srcs/sources_1/bd/keccak_system/keccak_system.bd
+!/Implementation/project/keccak_soc*/keccak_soc*.srcs/sources_1/bd/keccak_system/ip/
+/Implementation/project/keccak_soc*/keccak_soc*.srcs/sources_1/bd/keccak_system/ip/*
+!/Implementation/project/keccak_soc*/keccak_soc*.srcs/sources_1/bd/keccak_system/ip/*/
+/Implementation/project/keccak_soc*/keccak_soc*.srcs/sources_1/bd/keccak_system/ip/*/*
+!/Implementation/project/keccak_soc*/keccak_soc*.srcs/sources_1/bd/keccak_system/ip/*/*.xci
+!/Implementation/project/keccak_soc*/keccak_soc*.srcs/sources_1/ip/
+/Implementation/project/keccak_soc*/keccak_soc*.srcs/sources_1/ip/*
+!/Implementation/project/keccak_soc*/keccak_soc*.srcs/sources_1/ip/axi_protocol_checker_0/
+!/Implementation/project/keccak_soc*/keccak_soc*.srcs/sources_1/ip/axis_protocol_checker_0/
+/Implementation/project/keccak_soc*/keccak_soc*.srcs/sources_1/ip/*/*
+!/Implementation/project/keccak_soc*/keccak_soc*.srcs/sources_1/ip/axi_protocol_checker_0/axi_protocol_checker_0.xci
+!/Implementation/project/keccak_soc*/keccak_soc*.srcs/sources_1/ip/axis_protocol_checker_0/axis_protocol_checker_0.xci
 *.ioplanning/
 *.jou
 *.log
@@ -59,9 +97,11 @@ Implementation/project/keccak_soc/sim/vivado_export/
 Implementation/project/keccak_soc/sim/compile_order.txt
 Implementation/testbench/result.log
 
-# Vectors are regenerated from the checked-in Python oracles.
+# Keep the default simulation vectors; other generated vector files stay local.
 Implementation/vector/*
 !Implementation/vector/*.py
+!Implementation/vector/keccak_tv.mem
+!Implementation/vector/keccak_tv_spec.txt
 
 # Vitis workspaces, generated C vectors and verified local recovery archives.
 Software/vitis/workspace/

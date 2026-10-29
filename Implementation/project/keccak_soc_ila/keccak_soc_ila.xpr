@@ -110,7 +110,7 @@
           <Proxy FileSetName="keccak_system_zynq_ultra_ps_e_0_0"/>
         </CompFileExtendedInfo>
       </File>
-      <File Path="$PGENDIR/sources_1/bd/keccak_system/hdl/keccak_system_wrapper.v">
+      <File Path="$PPRDIR/hdl/keccak_system_wrapper.v">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
           <Attr Name="UsedIn" Val="implementation"/>
@@ -120,6 +120,7 @@
       <Config>
         <Option Name="DesignMode" Val="RTL"/>
         <Option Name="TopModule" Val="keccak_system_wrapper"/>
+        <Option Name="TopAutoSet" Val="FALSE"/>
         <Option Name="VerilogDir" Val="$PPRDIR/../../rtl/utils"/>
       </Config>
     </FileSet>
@@ -131,6 +132,16 @@
     </FileSet>
     <FileSet Name="sim_1" Type="SimulationSrcs" RelSrcDir="$PSRCDIR/sim_1" RelGenDir="$PGENDIR/sim_1">
       <Filter Type="Srcs"/>
+      <File Path="$PSRCDIR/sources_1/ip/axis_protocol_checker_0/axis_protocol_checker_0.xci">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
+      <File Path="$PSRCDIR/sources_1/ip/axi_protocol_checker_0/axi_protocol_checker_0.xci">
+        <FileInfo>
+          <Attr Name="UsedIn" Val="simulation"/>
+        </FileInfo>
+      </File>
       <File Path="$PPRDIR/../../rtl/utils/keccak_funcs.vh">
         <FileInfo>
           <Attr Name="UsedIn" Val="synthesis"/>
@@ -213,7 +224,6 @@
         <Option Name="LogicalNoCTopLib" Val=""/>
         <Option Name="Dmv" Val=""/>
         <Option Name="xsim.simulate.runtime" Val="all"/>
-        <Option Name="questa.simulate.vsim.more_options" Val="+VECTOR_DIR=/run/media/quan/Samsung/02_DuAn_LapTrinh/github-repo/keccak-mlkem/Implementation/vector"/>
       </Config>
     </FileSet>
     <FileSet Name="utils_1" Type="Utils" RelSrcDir="$PSRCDIR/utils_1" RelGenDir="$PGENDIR/utils_1">
