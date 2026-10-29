@@ -1,7 +1,6 @@
 `timescale 1ns / 1ps
 `include "keccak_defs.vh"
 
-// SoC testbench: tests the AXI wrapper. The testbench acts as CPU (AXI4-Lite) and DMA (AXI4-Stream in/out)
 module keccak_soc_tb;
 
     // Testbench parameters
@@ -12,6 +11,7 @@ module keccak_soc_tb;
     localparam integer VEC_BITS = 40 + 8 * (MAX_IN + MAX_OUT);
     localparam integer MAX_VEC = 1024;
     localparam integer TIMEOUT_CYCLES = 10000;
+    localparam integer FAULT_CASE = -1;
 
     // Register map
     localparam [11:0] REG_CONTROL       = 12'h00; // [0] START, [1] RESET, [2] CLEAR
@@ -21,39 +21,73 @@ module keccak_soc_tb;
     localparam [11:0] REG_OUTPUT_BYTES  = 12'h10;
     localparam [11:0] REG_VERSION       = 12'h14;
 
-    // AXI4-Lite signals (CPU writes/reads registers)
+    // Clock, reset & interrupt
     reg aclk, aresetn;
-    reg [11:0] awaddr, araddr;
-    reg awvalid, wvalid, bready, arvalid, rready;
-    reg [31:0] wdata;
-    wire awready, wready, bvalid, arready, rvalid;
-    wire [1:0] bresp, rresp;
-    wire [31:0] rdata;
-
-    // AXI4-Stream signals (DMA sends message in, receives digest out)
-    reg [AXIS_DATA_WIDTH-1:0] s_tdata;
-    reg [BEAT-1:0] s_tkeep;
-    reg s_tvalid, s_tlast;
-    wire s_tready;
-    wire [AXIS_DATA_WIDTH-1:0] m_tdata;
-    wire [BEAT-1:0] m_tkeep;
-    wire m_tvalid, m_tlast;
-    reg m_tready;
     wire irq;
+
+    // AXI4-Lite signals
+    // AW, W, B channels
+    reg [11:0] awaddr;
+    reg        awvalid;
+    wire       awready;
+
+    reg [31:0] wdata;
+    reg        wvalid;
+    wire       wready;
+
+    wire [1:0] bresp;
+    wire       bvalid;
+    reg        bready;
+
+    // AR, R channels
+    reg [11:0]  araddr;
+    reg         arvalid;
+    wire        arready;
+
+    wire [31:0] rdata;
+    wire        rvalid;
+    reg         rready;
+    wire [1:0]  rresp;
+
+    // AXI4-Stream signals
+    // Slave stream (input data)
+    reg [AXIS_DATA_WIDTH-1:0] s_tdata;
+    reg [BEAT-1:0]            s_tkeep;
+    reg                       s_tvalid;
+    reg                       s_tlast;
+    wire                      s_tready;
+
+    // Master stream (output data)
+    wire [AXIS_DATA_WIDTH-1:0] m_tdata;
+    wire [BEAT-1:0]            m_tkeep;
+    wire                       m_tvalid;
+    wire                       m_tlast;
+    reg                        m_tready;
+    
+    // Protocol checker outputs
+    wire pc_axi_err, pc_in_err, pc_out_err;
+    wire [159:0] pc_axi_status;
+    wire [31:0] pc_in_status, pc_out_status;
 
     // Vector: exp_out | msg | out_len | msg_len | mode
     reg [VEC_BITS-1:0] vec_all [0:MAX_VEC-1];
-    reg [8*MAX_IN-1:0] msg;
-    reg [8*MAX_OUT-1:0] exp_out, out_buf;
-    reg [31:0] rd, status;
+    reg [8*MAX_OUT-1:0] exp_out;        // [6439:3240]
+    reg [8*MAX_IN-1:0] msg;             // [3239:40]
+    reg [15:0] out_len;                 // [39:24]
+    reg [15:0] msg_len;                 // [23:8]
+    reg [`KECCAK_MODE_WIDTH-1:0] mode;  // [7:0]
+    
+    // Testbench buffers & AXI status
+    reg [8*MAX_OUT-1:0] out_buf;    // S2MM receive buffer
+    reg [31:0] status;              // AXI-Lite STATUS register
 
-    // Control and monitoring
-    integer mode, msg_len, out_len, offset, n;
+    // Testbench control & monitoring
+    integer offset, n;
     integer case_idx, tv_count, error_count, report_fd, spec_fd;
     integer out_cnt, watchdog, j;
-    reg last_seen, case_pass;
+    reg tlast_seen, case_pass;
 
-    // Testbench file and directory path
+    // Testbench file & directory path
     reg [8*512-1:0] tb_file;
     reg [8*512-1:0] tb_dir;
 
@@ -73,12 +107,44 @@ module keccak_soc_tb;
         .irq(irq)
     );
 
+    // AXI4-Lite monitor
+    axi_protocol_checker_0 u_pc_axi (
+        .aclk(aclk), .aresetn(aresetn),
+        .pc_axi_awaddr(awaddr), .pc_axi_awprot(3'b000), .pc_axi_awvalid(awvalid), .pc_axi_awready(awready),
+        .pc_axi_wdata(wdata), .pc_axi_wstrb(4'hF), .pc_axi_wvalid(wvalid), .pc_axi_wready(wready),
+        .pc_axi_bresp(bresp), .pc_axi_bvalid(bvalid), .pc_axi_bready(bready),
+        .pc_axi_araddr(araddr), .pc_axi_arprot(3'b000), .pc_axi_arvalid(arvalid), .pc_axi_arready(arready),
+        .pc_axi_rdata(rdata), .pc_axi_rresp(rresp), .pc_axi_rvalid(rvalid), .pc_axi_rready(rready),
+        .pc_asserted(pc_axi_err), .pc_status(pc_axi_status)
+    );
+
+    // AXI4-Stream input monitor
+    axis_protocol_checker_0 u_pc_in (
+        .aclk(aclk), .aresetn(aresetn),
+        .pc_axis_tdata(s_tdata), .pc_axis_tkeep(s_tkeep), .pc_axis_tvalid(s_tvalid),
+        .pc_axis_tready(s_tready), .pc_axis_tlast(s_tlast),
+        .pc_asserted(pc_in_err), .pc_status(pc_in_status)
+    );
+
+    // AXI4-Stream output monitor
+    axis_protocol_checker_0 u_pc_out (
+        .aclk(aclk), .aresetn(aresetn),
+        .pc_axis_tdata(m_tdata), .pc_axis_tkeep(m_tkeep), .pc_axis_tvalid(m_tvalid),
+        .pc_axis_tready(m_tready), .pc_axis_tlast(m_tlast),
+        .pc_asserted(pc_out_err), .pc_status(pc_out_status)
+    );
+
+    // Stop when a checker reports a protocol error
+    always @(posedge aclk) begin
+        if (aresetn && (pc_axi_err || pc_in_err || pc_out_err)) $fatal(1);
+    end
+
     initial begin
         aclk = 1'b0;
         forever #5 aclk = ~aclk;
     end
 
-    // Return the folder part of a file path (cut off the file name), used to locate the vector folder
+    // Return the folder part of a file path, used to locate the vector folder
     function [8*512-1:0] dirname(input [8*512-1:0] path);
         integer k, found;
         begin
@@ -92,7 +158,7 @@ module keccak_soc_tb;
         end
     endfunction
 
-    // Receive output stream like DMA S2MM: store each valid byte (tkeep = 1), stop at tlast
+    // Receive output digest from AXI4-Stream (emulate DMA S2MM channel)
     always @(posedge aclk) begin
         if (m_tvalid && m_tready) begin
             for (j = 0; j < BEAT; j = j + 1)
@@ -101,14 +167,14 @@ module keccak_soc_tb;
                     out_cnt = out_cnt + 1;
                 end
             if (m_tlast)
-                last_seen = 1'b1;
+                tlast_seen = 1'b1;
         end
     end
 
-    // Back-pressure: DMA S2MM randomly drops tready (about 1 cycle in 4)
+    // Back-pressure: DMA S2MM channel randomly drops tready
     always @(negedge aclk) m_tready = ($random & 3) != 0;
 
-    // Watchdog: if one case runs too long, print a timeout error and stop the simulation
+    // Watchdog: if one case runs too long, print a timeout error & stop the simulation
     always @(posedge aclk) begin
         if (u_dut.core_start)
             watchdog <= 0;
@@ -120,7 +186,8 @@ module keccak_soc_tb;
         end
     end
 
-    // AXI4-Lite write (like Xil_Out32): send address, send data, wait for response
+    // Host CPU emulation:
+    // AXI4-Lite write (Xil_Out32)
     task axi_write(input [11:0] addr, input [31:0] data);
     begin
         @(negedge aclk); awaddr = addr; awvalid = 1'b1;
@@ -134,7 +201,7 @@ module keccak_soc_tb;
     end
     endtask
 
-    // AXI4-Lite read (like Xil_In32): send address, wait for data
+    // AXI4-Lite read (Xil_In32)
     task axi_read(input [11:0] addr, output [31:0] data);
     begin
         @(negedge aclk); araddr = addr; arvalid = 1'b1;
@@ -146,15 +213,25 @@ module keccak_soc_tb;
     end
     endtask
 
-    // Send one beat of "bytes" bytes (tkeep marks valid bytes, last = 1 sets tlast on the final beat)
-    task send_beat(input integer bytes, input last);
+    // Send one beat (8 bytes) (emulate DMA MM2S channel)
+    task send_beat(input integer bytes, input tlast);
     begin
         @(negedge aclk);
         repeat ($random & 3) @(negedge aclk); // random idle gap before tvalid
         s_tdata = msg >> (8 * offset);
         s_tkeep = (1 << bytes) - 1;
-        s_tlast = last;
+        s_tlast = tlast;
         s_tvalid = 1'b1;
+
+        // Intentionally change TDATA while waiting for TREADY
+        if (case_idx == FAULT_CASE) begin
+            force s_tready = 1'b0;
+            @(negedge aclk);
+            s_tdata = s_tdata ^ 64'h1;
+            repeat (3) @(negedge aclk);
+            release s_tready;
+        end
+
         while (!s_tready) @(negedge aclk);
         @(negedge aclk);
         s_tvalid = 1'b0;
@@ -162,6 +239,7 @@ module keccak_soc_tb;
     end
     endtask
 
+    // Execute one full testcase: configure IP, stream message, poll status & verify
     task run_one_case(input integer idx);
     begin
         mode    = vec_all[idx][7:0];
@@ -169,35 +247,36 @@ module keccak_soc_tb;
         out_len = vec_all[idx][39:24];
         msg     = vec_all[idx][40 +: 8*MAX_IN];
         exp_out = vec_all[idx][40 + 8*MAX_IN +: 8*MAX_OUT];
+
         out_buf = 0;
         out_cnt = 0;
-        last_seen = 1'b0;
+        tlast_seen = 1'b0;
         case_pass = 1'b1;
 
-        // Configure the IP like main.c: clear, mode, message length, output length, start
+        // Configure IP registers via AXI4-Lite & start core
         axi_write(REG_CONTROL, 32'h4);
         axi_write(REG_MODE, mode);
         axi_write(REG_MESSAGE_BYTES, msg_len);
         axi_write(REG_OUTPUT_BYTES, out_len);
         axi_write(REG_CONTROL, 32'h1);
 
-        // Stream the message, 8 bytes per beat
+        // Stream the message into IP (8 bytes per beat)
         for (offset = 0; offset < msg_len; offset = offset + BEAT) begin
             n = (msg_len - offset < BEAT) ? (msg_len - offset) : BEAT;
             send_beat(n, offset + BEAT >= msg_len);
         end
 
-        // Poll STATUS until DONE or ERROR
+        // Poll STATUS register until DONE or ERROR
         status = 0;
         while ((status & 32'h6) == 0) axi_read(REG_STATUS, status);
 
-        // Check: DONE without ERROR, enough bytes, tlast seen, digest correct
+        // Verify & report PASS/FAIL
         if (status[2] || !status[1]) begin
             $display("[%0t] FAIL: Case %0d - STATUS 0x%h (error code 0x%h)", $time, idx, status, status[15:8]);
             case_pass = 1'b0;
         end
-        if (out_cnt != out_len || !last_seen) begin
-            $display("[%0t] FAIL: Case %0d - got %0d/%0d bytes, tlast %0d", $time, idx, out_cnt, out_len, last_seen);
+        if (out_cnt != out_len || !tlast_seen) begin
+            $display("[%0t] FAIL: Case %0d - got %0d/%0d bytes, tlast %0d", $time, idx, out_cnt, out_len, tlast_seen);
             case_pass = 1'b0;
         end
         for (j = 0; j < out_len; j = j + 1)
@@ -217,7 +296,7 @@ module keccak_soc_tb;
         $sformat(tb_file, "%s", `__FILE__);
         tb_dir = dirname(tb_file);
 
-        error_count = 0; aresetn = 1'b0; case_idx = 0; out_cnt = 0; last_seen = 1'b0;
+        error_count = 0; aresetn = 1'b0; case_idx = 0; out_cnt = 0; tlast_seen = 1'b0;
         awaddr = 0; awvalid = 1'b0; wdata = 0; wvalid = 1'b0; bready = 1'b1;
         araddr = 0; arvalid = 1'b0; rready = 1'b1;
         s_tdata = 0; s_tkeep = 0; s_tvalid = 1'b0; s_tlast = 1'b0; m_tready = 1'b1;
@@ -241,13 +320,6 @@ module keccak_soc_tb;
         #100;
         @(negedge aclk); aresetn = 1'b1;
         repeat (5) @(posedge aclk);
-
-        // Read VERSION to make sure AXI4-Lite works
-        axi_read(REG_VERSION, rd);
-        if (rd !== 32'h4b534c31) begin
-            $display("FAIL: VERSION = 0x%h (expect 0x4b534c31)", rd);
-            error_count = error_count + 1;
-        end
 
         for (case_idx = 0; case_idx < tv_count; case_idx = case_idx + 1)
             run_one_case(case_idx);

@@ -29,13 +29,13 @@ module keccak_ip_tb;
     reg [15:0] msg_len;                 // [23:8]
     reg [`KECCAK_MODE_WIDTH-1:0] mode;  // [7:0]
 
-    // Testbench control and monitoring
+    // Testbench control & monitoring
     integer rate, offset;
     integer case_idx, tv_count, error_count, report_fd, spec_fd;
     integer out_cnt, mismatch, watchdog, j;
     reg done_seen;
 
-    // Testbench file and directory path
+    // Testbench file & directory path
     reg [8*512-1:0] tb_file;
     reg [8*512-1:0] tb_dir;
 
@@ -95,7 +95,7 @@ module keccak_ip_tb;
     // Back-pressure test: output side randomly drops squeeze_ready
     always @(negedge clk) squeeze_ready = ($random & 3) != 0;
 
-    // Watchdog: if one case runs too long, print a timeout error and stop the simulation
+    // Watchdog: if one case runs too long, print a timeout error & stop the simulation
     always @(posedge clk) begin
         if (start)
             watchdog <= 0;
@@ -107,6 +107,7 @@ module keccak_ip_tb;
         end
     end
 
+    // Send one message block to DUT
     task send_block(input integer len, input last);
     begin
         @(negedge clk);
@@ -121,6 +122,7 @@ module keccak_ip_tb;
     end
     endtask
 
+    // Execute one full testcase: pulse start, send message blocks, wait for done & verify
     task run_one_case(input integer idx);
     begin
         mode     = vec_all[idx][7:0];
