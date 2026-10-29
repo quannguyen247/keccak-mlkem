@@ -41,7 +41,7 @@ context and are listed separately in the [specification](Implementation/docs/SPE
 | [`Implementation/vector/`](Implementation/vector/) | `keccak_vector.py`, the golden-vector generator shared by both testbenches |
 | [`Implementation/constraint/`](Implementation/constraint/) | 5 ns clock constraint for the standalone build |
 | [`Implementation/project/keccak_ip/`](Implementation/project/keccak_ip/) | Artix-7 out-of-context project for `keccak_top` |
-| [`Implementation/project/keccak_soc/`](Implementation/project/keccak_soc/) | KV260 block design without debug cores |
+| [`Implementation/project/keccak_soc/`](Implementation/project/keccak_soc/) | KV260 block design without debug cores; also holds the simulation-only AXI protocol checker IPs used by `keccak_soc_tb.v` |
 | [`Implementation/project/keccak_soc_ila/`](Implementation/project/keccak_soc_ila/) | KV260 block design with a System ILA; its XSA feeds the Vitis platform |
 | [`Implementation/project/ip_repo/keccak_core/`](Implementation/project/ip_repo/keccak_core/) | Packaged IP `quannguyen247.org:user:keccak_core:1.0` |
 | [`Implementation/docs/SPEC.md`](Implementation/docs/SPEC.md) | IP technical specification and register map |
@@ -60,29 +60,32 @@ tracked. Rebuild them after changing RTL, constraints or software.
 
 ## Test and build
 
-Generate the vectors, then run both testbenches from the `Implementation`
-directory. The testbenches find the vector files relative to their own path,
-so the working directory matters.
+Generate the vectors, then run both testbenches. The testbenches find the
+vector files relative to their own path.
 
 ```sh
 cd Implementation
 python3 vector/keccak_vector.py 150
 ```
 
+The core testbench runs in Icarus Verilog from the `Implementation` directory:
+
 ```sh
 iverilog -g2012 -I rtl/utils -o keccak_ip.vvp testbench/keccak_ip_tb.v rtl/modules/*.v
 vvp -n keccak_ip.vvp
 ```
 
-```sh
-iverilog -g2012 -I rtl/utils -o keccak_soc.vvp testbench/keccak_soc_tb.v rtl/modules/*.v
-vvp -n keccak_soc.vvp
-```
+The SoC testbench instantiates AMD AXI and AXI4-Stream protocol checker IPs on
+the wrapper ports, so it runs in the Vivado simulator: open
+`Implementation/project/keccak_soc/keccak_soc.xpr` and run behavioral
+simulation with `keccak_soc_tb` as the top. A protocol violation appears as an
+`ERROR` line in the simulator log. Setting `FAULT_CASE` in the testbench to a
+case index injects a deliberate `TDATA` change under backpressure to show that
+the checker fires; the default `-1` turns it off.
 
 Both runs print a pass count and write a per-case log to
 `testbench/keccak_ip_result.log` and `testbench/keccak_soc_result.log`. The
-current RTL passes 150/150 cases in each. The same testbenches are the
-simulation tops in the Vivado projects.
+current RTL passes 150/150 cases in each, with no checker errors.
 
 For implementation, open `Implementation/project/keccak_ip/keccak_ip.xpr` in
 Vivado 2025.2.1 and run synthesis and implementation. For the board, build

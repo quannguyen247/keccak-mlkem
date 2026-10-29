@@ -102,23 +102,6 @@ handshake completes.
 
 ## Microarchitecture
 
-```text
-                +----------------------------------------------------------+
-                |                       keccak_top                         |
-msg_block_in -->|  +------------------+        +-------------------------+ |
-msg_len_bytes ->|  | keccak_pad_block |------->|      keccak_sponge      | |
-                |  |  (combinational) | padded |   FSM, rate masks,      | |
-mode, start --->|  +------------------+ block  |   output counter        | |
-absorb_* ------>|                              |            |            | |
-squeeze_* <---->|                              |  +---------v----------+ | |
-done <----------|                              |  | keccak_permutation | | |
-                |                              |  | 1600-bit state,    | | |
-                |                              |  | 1 round per cycle  | | |
-                |                              |  +--------------------+ | |
-                |                              +-------------------------+ |
-                +----------------------------------------------------------+
-```
-
 ### Permutation (`keccak_permutation.v`)
 
 [`keccak_permutation.v`](../rtl/modules/keccak_permutation.v) computes theta,
@@ -362,10 +345,37 @@ messages of 0 to 400 bytes and outputs of 1 to 400 bytes.
 | Testbench | Device under test | Stimulus | Result (150 cases) |
 | --- | --- | --- | --- |
 | [`keccak_ip_tb.v`](../testbench/keccak_ip_tb.v) | `keccak_top` | Random gaps before `absorb_valid`; `squeeze_ready` low about one cycle in four | 150/150 pass |
-| [`keccak_soc_tb.v`](../testbench/keccak_soc_tb.v) | `keccak_top_wrapper`, 64-bit stream | AXI4-Lite register access, `VERSION` check, random gaps between input beats, output `TREADY` low about one cycle in four | 150/150 pass |
+| [`keccak_soc_tb.v`](../testbench/keccak_soc_tb.v) | `keccak_top_wrapper`, 64-bit stream | AXI4-Lite register access, random gaps between input beats, output `TREADY` low about one cycle in four, AXI protocol checkers on all three interfaces | 150/150 pass |
 
-Both results were obtained with Icarus Verilog. The Vivado projects use the
+The `keccak_ip_tb.v` result was obtained with Icarus Verilog and the
+`keccak_soc_tb.v` result with the Vivado simulator. The Vivado projects use the
 same testbenches as simulation tops.
+
+### Protocol checkers
+
+`keccak_soc_tb.v` instantiates three AMD protocol checker IPs that monitor the
+wrapper ports:
+
+| Instance | IP | Monitors | Configuration |
+| --- | --- | --- | --- |
+| `u_pc_axi` | `axi_protocol_checker_0` (AXI Protocol Checker) | `s_axi_ctrl` | AXI4-Lite, 32-bit data, 12-bit address |
+| `u_pc_in` | `axis_protocol_checker_0` (AXI4-Stream Protocol Checker) | `s_axis_dma` | 8-byte `TDATA`, `TKEEP`, `TLAST`, `TREADY` |
+| `u_pc_out` | `axis_protocol_checker_0` | `m_axis_dma` | Same as `u_pc_in` |
+
+The IPs live in `Implementation/project/keccak_soc` and are marked for
+simulation only. They are not in the block design, so they do not change the
+synthesis or implementation results. Wait-limit checks (`MAX_*_WAITS`) are
+disabled. `pc_status` and `pc_asserted` are left unconnected: a violation is
+printed as an `ERROR` line in the simulator log and is not part of the
+testbench pass count. Because of these IPs, `keccak_soc_tb.v` needs the Vivado
+simulator.
+
+The local parameter `FAULT_CASE` (default `-1`, off) selects one case for
+fault injection. In that case the testbench forces `s_axis_dma_tready` low for
+four cycles and flips bit 0 of `TDATA` while `TVALID` is high. `u_pc_in` then
+reports `AXI4STREAM_ERRM_TDATA_STABLE`, and the case also fails its digest
+check because the wrapper absorbs the changed word. With `FAULT_CASE = 9` the
+run ends at 149/150, which shows that the checker is active.
 
 The testbenches do not drive the error paths (codes `0x01` to `0x07`),
 `SOFT_RESET` during a request, or the interrupt. There is no UVM environment,
@@ -393,7 +403,8 @@ isolation, cache sharing, zeroization, side channels and fault attacks.
 2. National Institute of Standards and Technology, *Module-Lattice-Based
    Key-Encapsulation Mechanism Standard*, FIPS 203, Aug. 2024. DOI:
    [10.6028/NIST.FIPS.203](https://doi.org/10.6028/NIST.FIPS.203).
-3. AMD, *AXI DMA LogiCORE IP Product Guide*, PG021.
+3. AMD, *AXI DMA LogiCORE IP Product Guide*, PG021. [Online]. Available:
+   <https://docs.amd.com/r/en-US/pg021_axi_dma>.
 4. OpenTitan Project, "Example IP Block Guide," *OpenTitan Documentation*.
    [Online]. Available:
    <https://opentitan.org/book/doc/contributing/doc/example_ip_block.html>.
