@@ -79,5 +79,6 @@ Implementation/project/keccak_soc/hardware/capture/cpu_ready
 Implementation/project/keccak_soc/hardware/capture/ila_armed
 
 # Others
+Implementation/project/keccak_altera/
 scripts/
 Backups/

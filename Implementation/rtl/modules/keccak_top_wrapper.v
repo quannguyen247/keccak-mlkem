@@ -30,14 +30,14 @@ module keccak_top_wrapper #(
     output reg s_axi_ctrl_rvalid,
     input wire s_axi_ctrl_rready,
 
-    // AXI4-Stream input from DMA MM2S
+    // AXI4-Stream input from DMA MM2S channel
     input wire [AXIS_DATA_WIDTH-1:0] s_axis_dma_tdata,
     input wire [(AXIS_DATA_WIDTH/8)-1:0] s_axis_dma_tkeep,
     input wire s_axis_dma_tvalid,
     output wire s_axis_dma_tready,
     input wire s_axis_dma_tlast,
 
-    // AXI4-Stream output to DMA S2MM
+    // AXI4-Stream output to DMA S2MM channel
     output wire [AXIS_DATA_WIDTH-1:0] m_axis_dma_tdata,
     output wire [(AXIS_DATA_WIDTH/8)-1:0] m_axis_dma_tkeep,
     output wire m_axis_dma_tvalid,
