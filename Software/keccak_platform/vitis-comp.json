@@ -3,7 +3,7 @@
   "type": "PLATFORM",
   "configuration": {
     "description": "",
-    "xsa": "/run/media/quan/Samsung/01_HocTap_NghienCuu/ML-KEM_FULL/keccak-mlkem/Implementation/project/keccak_soc_ila/keccak_system_wrapper.xsa",
+    "xsa": "../Implementation/project/keccak_soc_ila/keccak_system_wrapper.xsa",
     "xsaPathInPlatform": "keccak_platform/hw/keccak_system_wrapper.xsa",
     "emulationXsa": "",
     "emulationXsaPathInPlatform": "",

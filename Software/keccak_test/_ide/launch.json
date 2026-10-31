@@ -30,7 +30,7 @@
 				"enableRPUSplitMode": false,
 				"resetAPU": false,
 				"resetRPU": false,
-				"bitstreamFile": "${workspaceFolder}/keccak_test/_ide/bitstream/keccak_system.bit",
+				"bitstreamFile": "${workspaceFolder}/keccak_platform/export/keccak_platform/hw/sdt/keccak_system_wrapper.bit",
 				"zuInitialization": {
 					"isFsbl": false,
 					"usingFSBL": {

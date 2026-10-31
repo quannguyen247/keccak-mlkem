@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 `include "keccak_defs.vh"
 
-module keccak_ip_tb;
+module keccak_top_tb;
 
     // Testbench parameters
     localparam integer MAX_IN = 400;
@@ -50,7 +50,7 @@ module keccak_ip_tb;
 
     initial begin
         clk = 1'b0;
-        forever #2.5 clk = ~clk;
+        forever #2 clk = ~clk;
     end
 
     // Return the block size (rate_bytes) of the selected mode
@@ -135,7 +135,7 @@ module keccak_ip_tb;
         output_blocks = (out_len + rate - 1) / rate;
         mismatch = 0;
 
-        // Start the IP (pulse)
+        // Start pulse
         @(negedge clk); start = 1'b1;
         @(negedge clk); start = 1'b0;
 
@@ -169,7 +169,7 @@ module keccak_ip_tb;
         squeeze_ready = 1'b1; squeeze_last = 1'b0; output_blocks = 0;
         out_cnt = 0; mismatch = 0; done_seen = 1'b0; out_len = 0;
 
-        report_fd = $fopen({tb_dir, "keccak_ip_result.log"}, "w");
+        report_fd = $fopen({tb_dir, "keccak_top_result.log"}, "w");
         spec_fd = $fopen({tb_dir, "../vector/keccak_tv_spec.txt"}, "r");
         if (spec_fd == 0) begin
             $display("ERROR: Cannot open vector/keccak_tv_spec.txt, run keccak_vector.py first");
@@ -192,7 +192,7 @@ module keccak_ip_tb;
         for (case_idx = 0; case_idx < tv_count; case_idx = case_idx + 1)
             run_one_case(case_idx);
 
-        $display("KECCAK IP PASSED: %0d/%0d CASES (%0d ERRORS)", tv_count - error_count, tv_count, error_count);
+        $display("KECCAK TOP PASSED: %0d/%0d CASES (%0d ERRORS)", tv_count - error_count, tv_count, error_count);
 
         if (report_fd != 0) $fclose(report_fd);
         #100;

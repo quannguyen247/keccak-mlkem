@@ -8,6 +8,9 @@ four FIPS 202 functions that ML-KEM (FIPS 203) uses: SHAKE128, SHAKE256,
 SHA3-256 and SHA3-512. It is written in Verilog-2001 and uses only slice logic
 on the reported Artix-7 build.
 
+Dolmeta et al. [4] provide a SHA-3 hardware reference for CRYSTALS-Kyber and
+a comparison point for the implementation results in [RESULT.md](RESULT.md).
+
 The section layout follows the
 [OpenTitan IP documentation guide](https://opentitan.org/book/doc/contributing/doc/example_ip_block.html).
 This is a documentation convention only. The IP does not use the OpenTitan bus
@@ -148,7 +151,7 @@ packaged IP is `quannguyen247.org:user:keccak_core:1.0` in
 
 | Parameter | Default | Description |
 | --- | ---: | --- |
-| `AXIS_DATA_WIDTH` | 32 | Stream width in bits. Supported values are 32 and 64. The KV260 design uses 64. |
+| `AXIS_DATA_WIDTH` | 64 | Stream width in bits. Supported values are 32 and 64. The KV260 design uses 64. |
 
 All interfaces use `aclk` and the synchronous active-low reset `aresetn`.
 
@@ -166,8 +169,10 @@ into run registers, so later register writes do not affect the running
 request. Input words are stored into the block buffer at the current byte
 offset. When the buffer holds a full rate block, or the beat that ends the
 message arrives, the buffer is passed to the core. `TREADY` is high only in the
-INPUT state, so the DMA waits while the core permutes. An empty message skips
-the input phase and absorbs one padding block.
+INPUT state. After the core accepts a block, the wrapper can load the next
+block while the core permutes the previous one. If the buffer fills before the
+core is ready, the wrapper lowers `TREADY` until that block is accepted. An
+empty message skips the input phase and absorbs one padding block.
 
 The first output word comes straight from `squeeze_out`. In the same cycle the
 wrapper copies the whole block into the block buffer and serializes the rest
@@ -189,8 +194,8 @@ after the final output beat is accepted and the core has finished.
 
 ### Register map
 
-Offsets are relative to the base address set in the block design
-(`0xA0010000` in the KV260 design).
+Offsets are relative to the base address that the Vivado Address Editor
+assigns automatically in the block design (`0xA0010000` in the KV260 design).
 
 | Offset | Name | Access | Description |
 | ---: | --- | :---: | --- |
@@ -208,6 +213,12 @@ FSM and the core to idle and clears `DONE`, `ERROR` and the error code. The
 configuration registers keep their values. `CLEAR_STATUS` clears the sticky
 flags without touching the core, and a legal `START` clears them as well.
 
+`SOFT_RESET` and the RECOVER reset are registered: they take effect one cycle
+after the `CONTROL` write (or after entering RECOVER). The extra cycle keeps the
+AXI4-Lite decode off the enables of the 1344-bit block buffer and the reset of
+the 1600-bit state. Software cannot observe the delay, because the next AXI4-Lite write needs at
+least two more cycles.
+
 SHA3-256 and SHA3-512 use an output length of 32 and 64 bytes set in hardware.
 `OUTPUT_BYTES` still reads back the written value. `BUSY` is high from START
 until the request finishes, and during the cycle that reports a stream error.
@@ -224,8 +235,8 @@ until the request finishes, and during the cycle that reports a stream error.
 | `0x06` | Beat carries more bytes than remain in the message | Aborted |
 | `0x07` | Stream FSM in an illegal state | Aborted |
 
-A stream error drops the offending beat, holds the core in reset for one
-RECOVER cycle and returns the wrapper to idle with `TREADY` low. The rest of
+A stream error drops the offending beat, resets the core one cycle after
+RECOVER and returns the wrapper to idle with `TREADY` low. The rest of
 the MM2S transfer then stalls inside the DMA, so software must reset the DMA
 channels before the next request.
 
@@ -242,12 +253,36 @@ design `keccak_system` for the Kria KV260 (`xck26-sfvc784-2LV-c`):
   transfer length. Register base `0xA0000000`.
 - `keccak_core_0` with `AXIS_DATA_WIDTH = 64`. MM2S feeds `s_axis_dma` and
   `m_axis_dma` feeds S2MM. Register base `0xA0010000`.
-- An interrupt concat with three inputs to PS IRQ0.
+- The Vivado Address Editor assigns both register bases automatically.
+- An interrupt concat connects `keccak_core_0/irq`, `axi_dma_0/mm2s_introut`
+  and `axi_dma_0/s2mm_introut` to inputs 0, 1 and 2, respectively, and its
+  output to PS `pl_ps_irq0`.
 - In `keccak_soc_ila` only: a System ILA with 8192 samples and three interface
   monitor slots.
 
-The 26-bit DMA length limits a single transfer, and therefore `MESSAGE_BYTES`
-and `OUTPUT_BYTES`, to `2^26 - 1` bytes in this design.
+### DMA interfaces and connections
+
+The configured AXI DMA has five active bus interfaces. The table follows the
+connections in the `keccak_system` block designs:
+
+| DMA interface | Type | Connection and role |
+| --- | --- | --- |
+| `S_AXI_LITE` | AXI4-Lite slave | PS `M_AXI_HPM0_FPD` accesses DMA registers through `axi_smc/S00_AXI` and `axi_smc/M00_AXI`. |
+| `M_AXI_MM2S` | AXI4 master | Reads message data from DDR through `axi_smc_1/S00_AXI`, `axi_smc_1/M00_AXI` and PS `S_AXI_HP0_FPD`. |
+| `M_AXIS_MM2S` | AXI4-Stream master | Sends the message directly to `keccak_core_0/s_axis_dma`. |
+| `S_AXIS_S2MM` | AXI4-Stream slave | Receives the result directly from `keccak_core_0/m_axis_dma`. |
+| `M_AXI_S2MM` | AXI4 master | Writes the result to DDR through `axi_smc_1/S01_AXI`, `axi_smc_1/M00_AXI` and PS `S_AXI_HP0_FPD`. |
+
+For Keccak register access, the same PS master and `axi_smc/S00_AXI` use
+`axi_smc/M01_AXI` to reach `keccak_core_0/s_axi_ctrl`. Both DMA memory
+interfaces and both streams carry 64-bit data. Scatter-gather is disabled, so
+`M_AXI_SG` is not used. The PS `pl_clk0` clocks these connections, and
+`proc_sys_reset_0/peripheral_aresetn` supplies their active-low reset.
+
+The 26-bit DMA length field limits each DMA transfer to `2^26 - 1` bytes. This
+also limits the message and output lengths when each is carried by one DMA
+transfer. The wrapper length registers are 32 bits; SHA3 ignores
+`OUTPUT_BYTES` and uses its fixed digest length.
 
 ### Software sequence
 
@@ -266,10 +301,12 @@ uses this sequence:
    the data reached memory.
 7. Invalidate the output buffer in the data cache and read the result.
 
-On `ERROR`, a DMA error or a timeout, write `SOFT_RESET | CLEAR_STATUS`, reset
-both DMA channels and discard the partial output before the next request. An
-empty message has no MM2S transfer. `IRQ_ENABLE` needs `WSTRB[1]`, so a CONTROL
-write that keeps interrupts on must keep bit 8 set.
+For a reusable driver, on `ERROR`, a DMA error or a timeout, write
+`SOFT_RESET | CLEAR_STATUS`, reset both DMA channels and discard the partial
+output before the next request. The example reports errors and exits; it has no
+timeout or recovery sequence. An empty message has no MM2S transfer.
+`IRQ_ENABLE` needs `WSTRB[1]`, so a CONTROL write that keeps interrupts on must
+keep bit 8 set.
 
 ## Performance
 
@@ -300,32 +337,39 @@ absorb interval, so the wrapper stays limited by the core when the DMA keeps
 up. A 32-bit stream needs 34 beats per 136-byte block and becomes the limit.
 DMA, DDR and software overheads have not been measured on the board.
 
+### Input overlap example
+
+For SHA3-256 with a 64-bit stream, a full 136-byte input block takes 17 beats.
+Each block then costs 25 core cycles: one absorb cycle, in which the sponge
+XORs the block into the state, and 24 permutation rounds. In a model where
+every block is full and loading overlaps perfectly with the preceding
+permutation:
+
+| Case | Estimated cycles for `N` blocks |
+| --- | ---: |
+| Without overlap | `(17 + 25)N = 42N` |
+| With overlap | `17 + 25N` |
+| Saved | `17(N - 1)` |
+
+For `N = 4`, this model gives 168 versus 117 cycles, saving 51 cycles (about
+1.44 times faster). The estimated speedup `42N / (17 + 25N)` approaches
+`42 / 25 = 1.68` as `N` grows. The model omits the fixed start and output
+overhead (5 cycles in the simulation below) and assumes full blocks.
+
+In [`keccak_soc_tb_pipeline.v`](../testbench/keccak_soc_tb_pipeline.v), a
+448-byte SHA3-256 message produces four padded blocks, but the last block has
+only 40 message bytes (5 input beats). A Vivado XSim run measured 122 cycles with
+overlap and 161 with the testbench delaying each new block, from `START` to the
+last accepted output beat. The 39-cycle saving (about 1.32 times faster) is
+specific to this simulation. Both cases use the same wrapper; the testbench
+controls the input delays, not a hardware pipeline enable. Its waveform
+indicators `core_busy`, `round_idx`, `load_block`, `load_beat`, `core_block`
+and `overlap` are testbench signals; `overlap` marks an input handshake during
+permutation. The testbench does not check the digest or model DMA and DDR.
+
 ## Implementation results
 
-Standalone core, `Implementation/project/keccak_ip`: top `keccak_top`,
-out-of-context, Artix-7 `xc7a100tcsg324-1`, 5 ns clock
-([`keccak.xdc`](../constraint/keccak.xdc)), Vivado 2025.2.1 default synthesis
-and implementation strategies.
-
-| LUT | FF | BRAM | DSP | WNS | WHS | Failing endpoints |
-| ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 5,868 | 1,675 | 0 | 0 | +0.125 ns | +0.104 ns | 0 |
-
-All LUTs are logic LUTs; there is no LUTRAM, SRL or F7/F8 mux. From the
-routed WNS the estimated Fmax is `1000 / (5.000 - 0.125)`, about 205 MHz.
-Vivado estimates 0.577 W total on-chip power (0.491 W dynamic, 0.085 W static)
-with default vectorless switching activity. This is not a board measurement.
-
-Full KV260 designs at 200 MHz, with the PS, DMA, interconnect and, in the ILA
-build, debug cores:
-
-| Project | CLB LUT | CLB FF | BRAM tiles | WNS | WHS |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| `keccak_soc` | 12,668 | 11,961 | 3 | +0.495 ns | +0.010 ns |
-| `keccak_soc_ila` | 16,209 | 18,012 | 62 | +0.454 ns | +0.010 ns |
-
-These numbers describe whole systems on a different device family and are not
-comparable with the standalone core result.
+Synthesis and implementation results are in [RESULT.md](RESULT.md).
 
 ## Verification
 
@@ -344,10 +388,10 @@ messages of 0 to 400 bytes and outputs of 1 to 400 bytes.
 
 | Testbench | Device under test | Stimulus | Result (150 cases) |
 | --- | --- | --- | --- |
-| [`keccak_ip_tb.v`](../testbench/keccak_ip_tb.v) | `keccak_top` | Random gaps before `absorb_valid`; `squeeze_ready` low about one cycle in four | 150/150 pass |
+| [`keccak_top_tb.v`](../testbench/keccak_top_tb.v) | `keccak_top` | Random gaps before `absorb_valid`; `squeeze_ready` low about one cycle in four | 150/150 pass |
 | [`keccak_soc_tb.v`](../testbench/keccak_soc_tb.v) | `keccak_top_wrapper`, 64-bit stream | AXI4-Lite register access, random gaps between input beats, output `TREADY` low about one cycle in four, AXI protocol checkers on all three interfaces | 150/150 pass |
 
-The `keccak_ip_tb.v` result was obtained with Icarus Verilog and the
+The `keccak_top_tb.v` result was obtained with Icarus Verilog and the
 `keccak_soc_tb.v` result with the Vivado simulator. The Vivado projects use the
 same testbenches as simulation tops.
 
@@ -405,6 +449,10 @@ isolation, cache sharing, zeroization, side channels and fault attacks.
    [10.6028/NIST.FIPS.203](https://doi.org/10.6028/NIST.FIPS.203).
 3. AMD, *AXI DMA LogiCORE IP Product Guide*, PG021. [Online]. Available:
    <https://docs.amd.com/r/en-US/pg021_axi_dma>.
-4. OpenTitan Project, "Example IP Block Guide," *OpenTitan Documentation*.
+4. A. Dolmeta, M. Martina and G. Masera, "Hardware architecture for
+   CRYSTALS-Kyber post-quantum cryptographic SHA-3 primitives," *PRIME*, 2023,
+   pp. 209-212. DOI:
+   [10.1109/PRIME58259.2023.10161780](https://doi.org/10.1109/PRIME58259.2023.10161780).
+5. OpenTitan Project, "Example IP Block Guide," *OpenTitan Documentation*.
    [Online]. Available:
    <https://opentitan.org/book/doc/contributing/doc/example_ip_block.html>.

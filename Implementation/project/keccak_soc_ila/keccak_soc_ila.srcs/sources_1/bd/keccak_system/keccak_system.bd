@@ -1255,7 +1255,7 @@
       },
       "keccak_core_0": {
         "vlnv": "quannguyen247.org:user:keccak_core:1.0",
-        "ip_revision": "4",
+        "ip_revision": "6",
         "xci_name": "keccak_system_keccak_core_0_0",
         "xci_path": "ip/keccak_system_keccak_core_0_0/keccak_system_keccak_core_0_0.xci",
         "inst_hier_path": "keccak_core_0",
