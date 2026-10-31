@@ -108,6 +108,9 @@ Software/vitis/workspace/
 Software/vitis/generated/
 Software/vitis/_ide/
 Software/vitis/.vitisWorkspace.json
+# Keep the platform's hardware handoff so a fresh clone can build the Vitis platform.
+!Software/keccak_platform/hw/keccak_system_wrapper.xsa
+!Software/keccak_platform/hw/sdt/keccak_system_wrapper.bit
 Software/legacy/**/*.tar.gz
 Software/legacy/**/manifest.json
 Software/legacy/**/ip_repositories/

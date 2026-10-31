@@ -1,7 +1,7 @@
 `timescale 1ns / 1ps
 `include "keccak_defs.vh"
 
-module keccak_ip_tb;
+module keccak_top_tb;
 
     // Testbench parameters
     localparam integer MAX_IN = 400;
@@ -29,13 +29,13 @@ module keccak_ip_tb;
     reg [15:0] msg_len;                 // [23:8]
     reg [`KECCAK_MODE_WIDTH-1:0] mode;  // [7:0]
 
-    // Testbench control and monitoring
+    // Testbench control & monitoring
     integer rate, offset;
     integer case_idx, tv_count, error_count, report_fd, spec_fd;
     integer out_cnt, mismatch, watchdog, j;
     reg done_seen;
 
-    // Testbench file and directory path
+    // Testbench file & directory path
     reg [8*512-1:0] tb_file;
     reg [8*512-1:0] tb_dir;
 
@@ -50,7 +50,7 @@ module keccak_ip_tb;
 
     initial begin
         clk = 1'b0;
-        forever #2.5 clk = ~clk;
+        forever #2 clk = ~clk;
     end
 
     // Return the block size (rate_bytes) of the selected mode
@@ -95,7 +95,7 @@ module keccak_ip_tb;
     // Back-pressure test: output side randomly drops squeeze_ready
     always @(negedge clk) squeeze_ready = ($random & 3) != 0;
 
-    // Watchdog: if one case runs too long, print a timeout error and stop the simulation
+    // Watchdog: if one case runs too long, print a timeout error & stop the simulation
     always @(posedge clk) begin
         if (start)
             watchdog <= 0;
@@ -107,6 +107,7 @@ module keccak_ip_tb;
         end
     end
 
+    // Send one message block to DUT
     task send_block(input integer len, input last);
     begin
         @(negedge clk);
@@ -121,6 +122,7 @@ module keccak_ip_tb;
     end
     endtask
 
+    // Execute one full testcase: pulse start, send message blocks, wait for done & verify
     task run_one_case(input integer idx);
     begin
         mode     = vec_all[idx][7:0];
@@ -133,7 +135,7 @@ module keccak_ip_tb;
         output_blocks = (out_len + rate - 1) / rate;
         mismatch = 0;
 
-        // Start the IP (pulse)
+        // Start pulse
         @(negedge clk); start = 1'b1;
         @(negedge clk); start = 1'b0;
 
@@ -167,10 +169,10 @@ module keccak_ip_tb;
         squeeze_ready = 1'b1; squeeze_last = 1'b0; output_blocks = 0;
         out_cnt = 0; mismatch = 0; done_seen = 1'b0; out_len = 0;
 
-        report_fd = $fopen({tb_dir, "keccak_ip_result.log"}, "w");
-        spec_fd = $fopen({tb_dir, "../vector/keccak_ip_tv_spec.txt"}, "r");
+        report_fd = $fopen({tb_dir, "keccak_top_result.log"}, "w");
+        spec_fd = $fopen({tb_dir, "../vector/keccak_tv_spec.txt"}, "r");
         if (spec_fd == 0) begin
-            $display("ERROR: Cannot open vector/keccak_ip_tv_spec.txt, run keccak_ip_vector.py first");
+            $display("ERROR: Cannot open vector/keccak_tv_spec.txt, run keccak_vector.py first");
             $finish;
         end
         j = $fscanf(spec_fd, "tv_count=%d", tv_count);
@@ -180,7 +182,7 @@ module keccak_ip_tb;
             $display("ERROR: tv_count exceeds MAX_VEC");
             $finish;
         end
-        $readmemh({tb_dir, "../vector/keccak_ip_tv.mem"}, vec_all, 0, tv_count - 1);
+        $readmemh({tb_dir, "../vector/keccak_tv.mem"}, vec_all, 0, tv_count - 1);
 
         // Reset
         #100;
@@ -190,7 +192,7 @@ module keccak_ip_tb;
         for (case_idx = 0; case_idx < tv_count; case_idx = case_idx + 1)
             run_one_case(case_idx);
 
-        $display("KECCAK IP PASSED: %0d/%0d CASES (%0d ERRORS)", tv_count - error_count, tv_count, error_count);
+        $display("KECCAK TOP PASSED: %0d/%0d CASES (%0d ERRORS)", tv_count - error_count, tv_count, error_count);
 
         if (report_fd != 0) $fclose(report_fd);
         #100;

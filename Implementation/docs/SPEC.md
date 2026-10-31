@@ -148,7 +148,7 @@ packaged IP is `quannguyen247.org:user:keccak_core:1.0` in
 
 | Parameter | Default | Description |
 | --- | ---: | --- |
-| `AXIS_DATA_WIDTH` | 32 | Stream width in bits. Supported values are 32 and 64. The KV260 design uses 64. |
+| `AXIS_DATA_WIDTH` | 64 | Stream width in bits. Supported values are 32 and 64. The KV260 design uses 64. |
 
 All interfaces use `aclk` and the synchronous active-low reset `aresetn`.
 
@@ -208,6 +208,12 @@ FSM and the core to idle and clears `DONE`, `ERROR` and the error code. The
 configuration registers keep their values. `CLEAR_STATUS` clears the sticky
 flags without touching the core, and a legal `START` clears them as well.
 
+`SOFT_RESET` and the RECOVER reset are registered: they take effect one cycle
+after the `CONTROL` write (or after entering RECOVER). The extra cycle keeps the
+AXI4-Lite decode off the enables of the 1344-bit block buffer and the reset of
+the 1600-bit state. Software cannot observe the delay, because the next AXI4-Lite write needs at
+least two more cycles.
+
 SHA3-256 and SHA3-512 use an output length of 32 and 64 bytes set in hardware.
 `OUTPUT_BYTES` still reads back the written value. `BUSY` is high from START
 until the request finishes, and during the cycle that reports a stream error.
@@ -224,8 +230,8 @@ until the request finishes, and during the cycle that reports a stream error.
 | `0x06` | Beat carries more bytes than remain in the message | Aborted |
 | `0x07` | Stream FSM in an illegal state | Aborted |
 
-A stream error drops the offending beat, holds the core in reset for one
-RECOVER cycle and returns the wrapper to idle with `TREADY` low. The rest of
+A stream error drops the offending beat, resets the core one cycle after
+RECOVER and returns the wrapper to idle with `TREADY` low. The rest of
 the MM2S transfer then stalls inside the DMA, so software must reset the DMA
 channels before the next request.
 
@@ -302,27 +308,26 @@ DMA, DDR and software overheads have not been measured on the board.
 
 ## Implementation results
 
-Standalone core, `Implementation/project/keccak_ip`: top `keccak_top`,
-out-of-context, Artix-7 `xc7a100tcsg324-1`, 5 ns clock
+Standalone IP, `Implementation/project/keccak_top`: top `keccak_top_wrapper`,
+out-of-context, Artix-7 `xc7a75tfgg676-3`, 4 ns clock
 ([`keccak.xdc`](../constraint/keccak.xdc)), Vivado 2025.2.1 default synthesis
 and implementation strategies.
 
 | LUT | FF | BRAM | DSP | WNS | WHS | Failing endpoints |
 | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 5,868 | 1,675 | 0 | 0 | +0.125 ns | +0.104 ns | 0 |
+| 7,668 | 3,279 | 0 | 0 | +0.022 ns | +0.091 ns | 0 |
 
-All LUTs are logic LUTs; there is no LUTRAM, SRL or F7/F8 mux. From the
-routed WNS the estimated Fmax is `1000 / (5.000 - 0.125)`, about 205 MHz.
-Vivado estimates 0.577 W total on-chip power (0.491 W dynamic, 0.085 W static)
-with default vectorless switching activity. This is not a board measurement.
+All LUTs are logic LUTs; there is no LUTRAM or SRL. The design uses 256 F7 and
+128 F8 muxes. From the routed WNS the estimated Fmax is
+`1000 / (4.000 - 0.022)`, about 251 MHz.
 
 Full KV260 designs at 200 MHz, with the PS, DMA, interconnect and, in the ILA
 build, debug cores:
 
 | Project | CLB LUT | CLB FF | BRAM tiles | WNS | WHS |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| `keccak_soc` | 12,668 | 11,961 | 3 | +0.495 ns | +0.010 ns |
-| `keccak_soc_ila` | 16,209 | 18,012 | 62 | +0.454 ns | +0.010 ns |
+| `keccak_soc` | 12,713 | 11,973 | 3 | +0.289 ns | +0.010 ns |
+| `keccak_soc_ila` | 16,258 | 18,028 | 62 | +0.358 ns | +0.010 ns |
 
 These numbers describe whole systems on a different device family and are not
 comparable with the standalone core result.
@@ -344,10 +349,10 @@ messages of 0 to 400 bytes and outputs of 1 to 400 bytes.
 
 | Testbench | Device under test | Stimulus | Result (150 cases) |
 | --- | --- | --- | --- |
-| [`keccak_ip_tb.v`](../testbench/keccak_ip_tb.v) | `keccak_top` | Random gaps before `absorb_valid`; `squeeze_ready` low about one cycle in four | 150/150 pass |
+| [`keccak_top_tb.v`](../testbench/keccak_top_tb.v) | `keccak_top` | Random gaps before `absorb_valid`; `squeeze_ready` low about one cycle in four | 150/150 pass |
 | [`keccak_soc_tb.v`](../testbench/keccak_soc_tb.v) | `keccak_top_wrapper`, 64-bit stream | AXI4-Lite register access, random gaps between input beats, output `TREADY` low about one cycle in four, AXI protocol checkers on all three interfaces | 150/150 pass |
 
-The `keccak_ip_tb.v` result was obtained with Icarus Verilog and the
+The `keccak_top_tb.v` result was obtained with Icarus Verilog and the
 `keccak_soc_tb.v` result with the Vivado simulator. The Vivado projects use the
 same testbenches as simulation tops.
 
