@@ -25,4 +25,3 @@ _ide/.peers.ini
 .rigel_lopper/
 compile_commands.json
 **/build_configs/
-_ide/version.ini

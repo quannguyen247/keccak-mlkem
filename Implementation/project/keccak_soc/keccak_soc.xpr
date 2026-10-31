@@ -54,6 +54,7 @@
     <Option Name="IPCachePermission" Val="write"/>
     <Option Name="EnableCoreContainer" Val="FALSE"/>
     <Option Name="EnableResourceEstimation" Val="FALSE"/>
+    <Option Name="SimCompileState" Val="TRUE"/>
     <Option Name="CreateRefXciForCoreContainers" Val="FALSE"/>
     <Option Name="IPUserFilesDir" Val="$PIPUSERFILESDIR"/>
     <Option Name="IPStaticSourceDir" Val="$PIPUSERFILESDIR/ipstatic"/>
@@ -100,9 +101,6 @@
         <CompFileExtendedInfo CompFileName="keccak_system.bd" FileRelPathName="ip/keccak_system_axi_dma_0_0/keccak_system_axi_dma_0_0.xci">
           <Proxy FileSetName="keccak_system_axi_dma_0_0"/>
         </CompFileExtendedInfo>
-        <CompFileExtendedInfo CompFileName="keccak_system.bd" FileRelPathName="ip/keccak_system_keccak_core_0_0/keccak_system_keccak_core_0_0.xci">
-          <Proxy FileSetName="keccak_system_keccak_core_0_0"/>
-        </CompFileExtendedInfo>
         <CompFileExtendedInfo CompFileName="keccak_system.bd" FileRelPathName="ip/keccak_system_proc_sys_reset_0_0/keccak_system_proc_sys_reset_0_0.xci">
           <Proxy FileSetName="keccak_system_proc_sys_reset_0_0"/>
         </CompFileExtendedInfo>
@@ -120,7 +118,6 @@
       <Config>
         <Option Name="DesignMode" Val="RTL"/>
         <Option Name="TopModule" Val="keccak_system_wrapper"/>
-        <Option Name="TopAutoSet" Val="FALSE"/>
         <Option Name="VerilogDir" Val="$PPRDIR/../../rtl/utils"/>
       </Config>
     </FileSet>
@@ -253,13 +250,6 @@
         <Option Name="UseBlackboxStub" Val="1"/>
       </Config>
     </FileSet>
-    <FileSet Name="keccak_system_keccak_core_0_0" Type="BlockSrcs" RelSrcDir="$PSRCDIR/keccak_system_keccak_core_0_0" RelGenDir="$PGENDIR/keccak_system_keccak_core_0_0">
-      <Config>
-        <Option Name="TopModule" Val="keccak_system_keccak_core_0_0"/>
-        <Option Name="VerilogDir" Val="$PPRDIR/../../rtl/utils"/>
-        <Option Name="UseBlackboxStub" Val="1"/>
-      </Config>
-    </FileSet>
     <FileSet Name="axi_protocol_checker_0" Type="BlockSrcs" RelSrcDir="$PSRCDIR/axi_protocol_checker_0" RelGenDir="$PGENDIR/axi_protocol_checker_0">
       <File Path="$PSRCDIR/sources_1/ip/axi_protocol_checker_0/axi_protocol_checker_0.xci">
         <FileInfo>
@@ -353,16 +343,6 @@
       <Report Name="ROUTE_DESIGN.REPORT_METHODOLOGY" Enabled="1"/>
       <RQSFiles/>
     </Run>
-    <Run Id="keccak_system_keccak_core_0_0_synth_1" Type="Ft3:Synth" SrcSet="keccak_system_keccak_core_0_0" Part="xck26-sfvc784-2LV-c" ConstrsSet="keccak_system_keccak_core_0_0" Description="Vivado Synthesis Defaults" AutoIncrementalCheckpoint="false" WriteIncrSynthDcp="false" Dir="$PRUNDIR/keccak_system_keccak_core_0_0_synth_1" IncludeInArchive="true" IsChild="false" AutoIncrementalDir="$PSRCDIR/utils_1/imports/keccak_system_keccak_core_0_0_synth_1" AutoRQSDir="$PSRCDIR/utils_1/imports/keccak_system_keccak_core_0_0_synth_1" ParallelReportGen="true">
-      <Strategy Version="1" Minor="2">
-        <StratHandle Name="Vivado Synthesis Defaults" Flow="Vivado Synthesis 2025"/>
-        <Step Id="synth_design"/>
-      </Strategy>
-      <GeneratedRun Dir="$PRUNDIR" File="gen_run.xml"/>
-      <ReportStrategy Name="Vivado Synthesis Default Reports" Flow="Vivado Synthesis 2025"/>
-      <Report Name="ROUTE_DESIGN.REPORT_METHODOLOGY" Enabled="1"/>
-      <RQSFiles/>
-    </Run>
     <Run Id="axi_protocol_checker_0_synth_1" Type="Ft3:Synth" SrcSet="axi_protocol_checker_0" Part="xck26-sfvc784-2LV-c" ConstrsSet="axi_protocol_checker_0" Description="Vivado Synthesis Defaults" AutoIncrementalCheckpoint="false" WriteIncrSynthDcp="false" Dir="$PRUNDIR/axi_protocol_checker_0_synth_1" IncludeInArchive="true" IsChild="false" AutoIncrementalDir="$PSRCDIR/utils_1/imports/axi_protocol_checker_0_synth_1" AutoRQSDir="$PSRCDIR/utils_1/imports/axi_protocol_checker_0_synth_1" ParallelReportGen="true">
       <Strategy Version="1" Minor="2">
         <StratHandle Name="Vivado Synthesis Defaults" Flow="Vivado Synthesis 2025"/>
@@ -383,7 +363,7 @@
       <Report Name="ROUTE_DESIGN.REPORT_METHODOLOGY" Enabled="1"/>
       <RQSFiles/>
     </Run>
-    <Run Id="impl_1" Type="Ft2:EntireDesign" Part="xck26-sfvc784-2LV-c" ConstrsSet="constrs_1" Description="Default settings for Implementation." AutoIncrementalCheckpoint="false" WriteIncrSynthDcp="false" State="current" Dir="$PRUNDIR/impl_1" SynthRun="synth_1" IncludeInArchive="true" IsChild="false" GenFullBitstream="true" AutoIncrementalDir="$PSRCDIR/utils_1/imports/impl_1" LaunchOptions="-jobs 6 " AutoRQSDir="$PSRCDIR/utils_1/imports/impl_1" ParallelReportGen="true">
+    <Run Id="impl_1" Type="Ft2:EntireDesign" Part="xck26-sfvc784-2LV-c" ConstrsSet="constrs_1" Description="Default settings for Implementation." AutoIncrementalCheckpoint="false" WriteIncrSynthDcp="false" State="current" Dir="$PRUNDIR/impl_1" SynthRun="synth_1" IncludeInArchive="true" IsChild="false" GenFullBitstream="true" AutoIncrementalDir="$PSRCDIR/utils_1/imports/impl_1" LaunchOptions="-jobs 4 " AutoRQSDir="$PSRCDIR/utils_1/imports/impl_1" ParallelReportGen="true">
       <Strategy Version="1" Minor="2">
         <StratHandle Name="Vivado Implementation Defaults" Flow="Vivado Implementation 2025"/>
         <Step Id="init_design"/>
@@ -436,23 +416,6 @@
       <RQSFiles/>
     </Run>
     <Run Id="keccak_system_axi_dma_0_0_impl_1" Type="Ft2:EntireDesign" Part="xck26-sfvc784-2LV-c" ConstrsSet="keccak_system_axi_dma_0_0" Description="Default settings for Implementation." AutoIncrementalCheckpoint="false" WriteIncrSynthDcp="false" SynthRun="keccak_system_axi_dma_0_0_synth_1" IncludeInArchive="false" IsChild="false" GenFullBitstream="true" AutoIncrementalDir="$PSRCDIR/utils_1/imports/keccak_system_axi_dma_0_0_impl_1" AutoRQSDir="$PSRCDIR/utils_1/imports/keccak_system_axi_dma_0_0_impl_1" ParallelReportGen="true">
-      <Strategy Version="1" Minor="2">
-        <StratHandle Name="Vivado Implementation Defaults" Flow="Vivado Implementation 2025"/>
-        <Step Id="init_design"/>
-        <Step Id="opt_design"/>
-        <Step Id="power_opt_design"/>
-        <Step Id="place_design"/>
-        <Step Id="post_place_power_opt_design"/>
-        <Step Id="phys_opt_design"/>
-        <Step Id="route_design"/>
-        <Step Id="post_route_phys_opt_design"/>
-        <Step Id="write_bitstream"/>
-      </Strategy>
-      <ReportStrategy Name="Vivado Implementation Default Reports" Flow="Vivado Implementation 2025"/>
-      <Report Name="ROUTE_DESIGN.REPORT_METHODOLOGY" Enabled="1"/>
-      <RQSFiles/>
-    </Run>
-    <Run Id="keccak_system_keccak_core_0_0_impl_1" Type="Ft2:EntireDesign" Part="xck26-sfvc784-2LV-c" ConstrsSet="keccak_system_keccak_core_0_0" Description="Default settings for Implementation." AutoIncrementalCheckpoint="false" WriteIncrSynthDcp="false" SynthRun="keccak_system_keccak_core_0_0_synth_1" IncludeInArchive="false" IsChild="false" GenFullBitstream="true" AutoIncrementalDir="$PSRCDIR/utils_1/imports/keccak_system_keccak_core_0_0_impl_1" AutoRQSDir="$PSRCDIR/utils_1/imports/keccak_system_keccak_core_0_0_impl_1" ParallelReportGen="true">
       <Strategy Version="1" Minor="2">
         <StratHandle Name="Vivado Implementation Defaults" Flow="Vivado Implementation 2025"/>
         <Step Id="init_design"/>
