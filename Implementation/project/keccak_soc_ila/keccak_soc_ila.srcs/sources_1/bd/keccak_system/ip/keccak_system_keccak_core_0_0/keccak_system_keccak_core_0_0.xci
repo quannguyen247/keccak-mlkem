@@ -4,7 +4,7 @@
     "xci_name": "keccak_system_keccak_core_0_0",
     "cell_name": "keccak_core_0",
     "component_reference": "quannguyen247.org:user:keccak_core:1.0",
-    "ip_revision": "6",
+    "ip_revision": "7",
     "gen_directory": "../../../../../../keccak_soc_ila.gen/sources_1/bd/keccak_system/ip/keccak_system_keccak_core_0_0",
     "parameters": {
       "component_parameters": {
@@ -29,7 +29,7 @@
       },
       "runtime_parameters": {
         "IPCONTEXT": [ { "value": "IP_Integrator" } ],
-        "IPREVISION": [ { "value": "6" } ],
+        "IPREVISION": [ { "value": "7" } ],
         "MANAGED": [ { "value": "TRUE" } ],
         "OUTPUTDIR": [ { "value": "../../../../../../keccak_soc_ila.gen/sources_1/bd/keccak_system/ip/keccak_system_keccak_core_0_0" } ],
         "SELECTEDSIMMODEL": [ { "value": "" } ],
@@ -246,5 +246,5 @@
       }
     }
   },
-  "checksum": "8b3d7b8e"
+  "checksum": "873934ac"
 }

@@ -12,13 +12,13 @@ implement ML-KEM KeyGen, Encaps or Decaps.
 
 ## Key results
 
-The standalone out-of-context run of `keccak_top_wrapper` uses AMD Vivado
+The standalone run of `keccak_top_wrapper` uses AMD Vivado
 2025.2.1 on Artix-7 `xc7a75tfgg676-3` at 250 MHz (4 ns clock period), with
 default synthesis and implementation strategies and no debug cores:
 
-- Resources: 7,668 LUTs (all logic), 3,279 flip-flops, 0 BRAM, 0 DSP.
-- Timing: WNS = +0.022 ns, WHS = +0.091 ns, no failing endpoints. The
-  estimated Fmax from WNS is 1000 / (4.000 - 0.022), about 251 MHz.
+- Resources: 7,138 LUTs (all logic), 3,266 flip-flops, 0 BRAM, 0 DSP.
+- Timing: WNS = +0.111 ns, WHS = +0.091 ns, no failing endpoints. The
+  estimated Fmax from WNS is 1000 / (4.000 - 0.111), about 257 MHz.
 - Latency: 24 cycles per permutation. A single-block SHA3-256 request takes
   26 cycles from `start` to the digest. Dependent message blocks are absorbed
   every 25 cycles and SHAKE output blocks follow every 26 cycles.
@@ -37,7 +37,7 @@ context and are listed separately in the [implementation results](Implementation
 | [`Implementation/testbench/`](Implementation/testbench/) | Self-checking testbenches for the core and the SoC wrapper |
 | [`Implementation/vector/`](Implementation/vector/) | `keccak_vector.py`, the golden-vector generator shared by both testbenches |
 | [`Implementation/constraint/`](Implementation/constraint/) | 4 ns clock constraint for the standalone build |
-| [`Implementation/project/keccak_top/`](Implementation/project/keccak_top/) | Artix-7 out-of-context project for `keccak_top_wrapper` |
+| [`Implementation/project/keccak_top/`](Implementation/project/keccak_top/) | Artix-7 project for `keccak_top_wrapper` |
 | [`Implementation/project/keccak_soc/`](Implementation/project/keccak_soc/) | KV260 block design without debug cores; includes simulation-only AXI protocol checker IPs used by `keccak_soc_tb.v` |
 | [`Implementation/project/keccak_soc_ila/`](Implementation/project/keccak_soc_ila/) | KV260 block design with a System ILA and the same simulation checkers; its XSA feeds the Vitis platform |
 | [`Implementation/project/ip_repo/keccak_core/`](Implementation/project/ip_repo/keccak_core/) | Packaged IP `quannguyen247.org:user:keccak_core:1.0` |

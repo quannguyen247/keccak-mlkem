@@ -24,8 +24,7 @@ module keccak_top (
 
     // Control and status
     input wire start,                               
-    output wire done,
-    input wire [31:0] output_blocks // SHAKE only
+    output wire done
 );
 
     // Padding unit outputs
@@ -59,8 +58,7 @@ module keccak_top (
         .squeeze_out(squeeze_out),
         .squeeze_bytes(squeeze_bytes),
         .start(start),
-        .done(done),
-        .output_blocks(output_blocks)
+        .done(done)
     );
 
     // Job config update

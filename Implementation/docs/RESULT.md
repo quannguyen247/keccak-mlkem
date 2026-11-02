@@ -6,21 +6,21 @@ specified in [SPEC.md](SPEC.md).
 Standalone IP: the Vivado project is `Implementation/project/keccak_top`,
 and its synthesis top is `keccak_top_wrapper`, which instantiates the native
 `keccak_top` core. The results include the wrapper. The build uses
-out-of-context synthesis, Artix-7 `xc7a75tfgg676-3`, a 4 ns clock
+Artix-7 `xc7a75tfgg676-3`, a 4 ns clock
 ([`keccak.xdc`](../constraint/keccak.xdc)), and Vivado 2025.2.1 default
 synthesis and implementation strategies.
 
 | LUT | FF | BRAM | DSP | WNS | WHS | Failing endpoints |
 | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| 7,671 | 3,280 | 0 | 0 | +0.022 ns | +0.091 ns | 0 |
+| 7,138 | 3,266 | 0 | 0 | +0.111 ns | +0.091 ns | 0 |
 
 Resource counts are taken from the routed design. The run's
-`utilization_placed` report (7,668 LUTs, 3,279 FFs) is written before the
+`utilization_placed` report (7,133 LUTs, 3,263 FFs) is written before the
 post-place `phys_opt_design` step, which replicates a few cells for timing.
 
 All LUTs are logic LUTs; there is no LUTRAM or SRL. The design uses 256 F7 and
 128 F8 muxes. From the routed WNS the estimated Fmax is
-`1000 / (4.000 - 0.022)`, about 251 MHz.
+`1000 / (4.000 - 0.111)`, about 257 MHz.
 
 For comparison, Dolmeta et al. [4] report 9,651 LUTs and 8,697 FFs for their
 whole SHA-3 architecture, and 6,841 LUTs and 4,279 FFs for its SHA3 core
@@ -33,8 +33,8 @@ build, debug cores:
 
 | Project | CLB LUT | CLB FF | BRAM tiles | WNS | WHS |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| `keccak_soc` | 12,713 | 11,973 | 3 | +0.289 ns | +0.010 ns |
-| `keccak_soc_ila` | 16,258 | 18,028 | 62 | +0.358 ns | +0.010 ns |
+| `keccak_soc` | 12,753 | 11,931 | 3 | +0.646 ns | +0.010 ns |
+| `keccak_soc_ila` | 16,291 | 17,983 | 62 | +0.297 ns | +0.010 ns |
 
 These numbers describe whole systems on a different device family and are not
 comparable with the standalone wrapper result.

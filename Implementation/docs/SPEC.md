@@ -68,7 +68,6 @@ and a synchronous active-low reset.
 | `rst_n` | in | 1 | Synchronous active-low reset. Returns the FSMs to idle and clears the state. |
 | `mode` | in | 2 | Function select, sampled with `start`. |
 | `start` | in | 1 | Starts a request. Accepted only while the core is idle. |
-| `output_blocks` | in | 32 | SHAKE output length in rate blocks, sampled with `start`. `0` selects open-ended output. Ignored for SHA3. |
 | `absorb_valid` | in | 1 | Input block valid. |
 | `absorb_ready` | out | 1 | Core can accept an input block. |
 | `absorb_last` | in | 1 | Marks the final input block of the request. |
@@ -76,14 +75,14 @@ and a synchronous active-low reset.
 | `msg_len_bytes` | in | 8 | Valid bytes in `msg_block_in`. |
 | `squeeze_valid` | out | 1 | Output block valid. |
 | `squeeze_ready` | in | 1 | Caller accepts the output block. |
-| `squeeze_last` | in | 1 | Ends an open-ended SHAKE stream on the accepted block. |
+| `squeeze_last` | in | 1 | Ends a SHAKE stream on the accepted block. Ignored for SHA3. |
 | `squeeze_out` | out | 1344 | Output block. Bytes beyond `squeeze_bytes` read as zero. |
 | `squeeze_bytes` | out | 8 | Valid bytes per output block: 168, 136, 32 or 64. |
 | `done` | out | 1 | One-cycle pulse after the final output block is accepted. |
 
 ### Operation protocol
 
-1. Drive `mode` and `output_blocks`, then pulse `start` for one cycle while the
+1. Drive `mode`, then pulse `start` for one cycle while the
    core is idle.
 2. Send the message in rate-sized blocks. Each block is transferred when
    `absorb_valid` and `absorb_ready` are both high. Every block except the last
@@ -94,8 +93,7 @@ and a synchronous active-low reset.
    `absorb_last` until the block is accepted.
 4. Read output blocks on `squeeze_valid && squeeze_ready`. Lowering
    `squeeze_ready` stalls the core with the block held stable. SHA3 produces
-   one block. SHAKE produces `output_blocks` blocks, or with
-   `output_blocks = 0` it continues until a block is accepted with
+   one block. SHAKE continues until a block is accepted with
    `squeeze_last` high. The caller discards unused bytes of the final SHAKE
    block.
 5. `done` pulses for one cycle and the core returns to idle.
@@ -366,10 +364,6 @@ controls the input delays, not a hardware pipeline enable. Its waveform
 indicators `core_busy`, `round_idx`, `load_block`, `load_beat`, `core_block`
 and `overlap` are testbench signals; `overlap` marks an input handshake during
 permutation. The testbench does not check the digest or model DMA and DDR.
-
-## Implementation results
-
-Synthesis and implementation results are in [RESULT.md](RESULT.md).
 
 ## Verification
 

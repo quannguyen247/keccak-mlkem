@@ -329,8 +329,7 @@ module keccak_top_wrapper #(
         .squeeze_out(squeeze_data),
         .squeeze_bytes(squeeze_bytes),
         .start(state_reg == ST_START),
-        .done(sponge_done),
-        .output_blocks(32'd0)
+        .done(sponge_done)
     );
 
     // Stream adapter FSM

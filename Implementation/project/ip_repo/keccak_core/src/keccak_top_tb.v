@@ -15,8 +15,7 @@ module keccak_top_tb;
     reg absorb_valid, absorb_last;
     reg [`KECCAK_RATE_BITS-1:0] msg_block_in;
     reg [7:0] msg_len_bytes;
-    reg squeeze_ready, squeeze_last;
-    reg [31:0] output_blocks;
+    reg squeeze_ready;
     wire absorb_ready, squeeze_valid, done;
     wire [`KECCAK_RATE_BITS-1:0] squeeze_out;
     wire [7:0] squeeze_bytes;
@@ -43,9 +42,9 @@ module keccak_top_tb;
         .clk(clk), .rst_n(rst_n), .mode(mode),
         .absorb_valid(absorb_valid), .absorb_last(absorb_last),
         .msg_block_in(msg_block_in), .msg_len_bytes(msg_len_bytes), .absorb_ready(absorb_ready),
-        .squeeze_ready(squeeze_ready), .squeeze_last(squeeze_last),
+        .squeeze_ready(squeeze_ready), .squeeze_last(!mode[1] && (out_cnt + squeeze_bytes >= out_len)),
         .squeeze_valid(squeeze_valid), .squeeze_out(squeeze_out), .squeeze_bytes(squeeze_bytes),
-        .start(start), .done(done), .output_blocks(output_blocks)
+        .start(start), .done(done)
     );
 
     initial begin
@@ -79,17 +78,17 @@ module keccak_top_tb;
     // Compare each output byte with the expected byte, count mismatches
     always @(posedge clk) begin
         if (start) begin
-            out_cnt = 0;
-            done_seen = 1'b0;
+            out_cnt <= 0;
+            done_seen <= 1'b0;
         end
         if (squeeze_valid && squeeze_ready) begin
             for (j = 0; j < squeeze_bytes; j = j + 1)
                 if (out_cnt + j < out_len && squeeze_out[8*j +: 8] !== exp_out[8*(out_cnt+j) +: 8])
-                    mismatch = mismatch + 1;
-            out_cnt = out_cnt + squeeze_bytes;
+                    mismatch <= mismatch + 1;
+            out_cnt <= out_cnt + squeeze_bytes;
         end
         if (done)
-            done_seen = 1'b1;
+            done_seen <= 1'b1;
     end
 
     // Back-pressure test: output side randomly drops squeeze_ready
@@ -132,7 +131,6 @@ module keccak_top_tb;
         exp_out  = vec_all[idx][40 + 8*MAX_IN +: 8*MAX_OUT]; 
 
         rate = rate_bytes(mode);
-        output_blocks = (out_len + rate - 1) / rate;
         mismatch = 0;
 
         // Start pulse
@@ -166,7 +164,7 @@ module keccak_top_tb;
 
         error_count = 0; rst_n = 1'b0; start = 1'b0; mode = 0; case_idx = 0;
         absorb_valid = 1'b0; absorb_last = 1'b0; msg_block_in = 0; msg_len_bytes = 0;
-        squeeze_ready = 1'b1; squeeze_last = 1'b0; output_blocks = 0;
+        squeeze_ready = 1'b1;
         out_cnt = 0; mismatch = 0; done_seen = 1'b0; out_len = 0;
 
         report_fd = $fopen({tb_dir, "keccak_top_result.log"}, "w");

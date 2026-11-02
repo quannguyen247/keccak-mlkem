@@ -153,11 +153,11 @@ module keccak_soc_tb;
         if (m_tvalid && m_tready) begin
             for (j = 0; j < BEAT; j = j + 1)
                 if (m_tkeep[j]) begin
-                    out_buf[8*out_cnt +: 8] = m_tdata[8*j +: 8];
-                    out_cnt = out_cnt + 1;
+                    out_buf[8*(out_cnt+j) +: 8] <= m_tdata[8*j +: 8];
+                    out_cnt <= out_cnt + j + 1;
                 end
             if (m_tlast)
-                tlast_seen = 1'b1;
+                tlast_seen <= 1'b1;
         end
     end
 

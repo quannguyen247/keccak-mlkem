@@ -1,9 +1,7 @@
 `timescale 1ns / 1ps
 `include "keccak_defs.vh"
 
-module keccak_sponge #(
-    parameter BLOCK_WIDTH = 32
-)(
+module keccak_sponge (
     input wire clk,
     input wire rst_n,
 
@@ -25,8 +23,7 @@ module keccak_sponge #(
 
     // Global control
     input wire start,
-    output wire done,
-    input wire [BLOCK_WIDTH-1:0] output_blocks
+    output wire done
 );
 
     `include "keccak_funcs.vh"
@@ -43,8 +40,6 @@ module keccak_sponge #(
 
     // Job config
     reg [`KECCAK_MODE_WIDTH-1:0] mode_reg;
-    reg [BLOCK_WIDTH-1:0] squeeze_left_reg;
-    reg xof_stream_reg;           
     reg absorb_last_reg;
     reg absorb_mid_en_reg; // rate > 576 bits (all modes except SHA3-512)
     reg absorb_hi_en_reg;  // rate > 1088 bits (SHAKE128 only)
@@ -55,9 +50,8 @@ module keccak_sponge #(
 
     // Absorb/squeeze handshake flags
     wire absorb_fire = (curr_state == ST_ABSORB) && absorb_valid;
-    wire squeeze_more = xof_stream_reg || (squeeze_left_reg > 0);
-    wire squeeze_fire = (curr_state == ST_SQUEEZE) && squeeze_ready && squeeze_more;
-    wire squeeze_end = (xof_stream_reg && squeeze_last) || (!xof_stream_reg && squeeze_left_reg == 1);
+    wire squeeze_fire = (curr_state == ST_SQUEEZE) && squeeze_ready;
+    wire squeeze_end = !keccak_is_xof(mode_reg) || squeeze_last;
 
     // Keccak permutation interface
     wire [`KECCAK_STATE_WIDTH-1:0] keccak_state;
@@ -84,7 +78,7 @@ module keccak_sponge #(
                 next_state = ST_PERMUTE;
             ST_START: next_state = ST_PERMUTE;
             ST_PERMUTE: if (perm_last)
-                next_state = !absorb_last_reg ? ST_ABSORB : (squeeze_more ? ST_SQUEEZE : ST_DONE);
+                next_state = !absorb_last_reg ? ST_ABSORB : ST_SQUEEZE;
             ST_SQUEEZE: if (squeeze_fire)
                 next_state = squeeze_end ? ST_DONE : ST_START;
             ST_DONE: next_state = ST_IDLE;
@@ -138,17 +132,11 @@ module keccak_sponge #(
                         mode_reg <= mode;
                         absorb_mid_en_reg <= (mode != `KECCAK_MODE_SHA3_512);
                         absorb_hi_en_reg <= (mode == `KECCAK_MODE_SHAKE128);
-                        squeeze_left_reg <= keccak_is_xof(mode) ? output_blocks : 1;
-                        xof_stream_reg <= keccak_is_xof(mode) && (output_blocks == 0);
                     end
                 end
                 ST_ABSORB: begin
                     if (absorb_fire)
                         absorb_last_reg <= absorb_last;
-                end
-                ST_SQUEEZE: begin
-                    if (squeeze_fire && !xof_stream_reg)
-                        squeeze_left_reg <= squeeze_left_reg - 1'b1;
                 end
                 default: ;
             endcase
@@ -156,7 +144,7 @@ module keccak_sponge #(
     end
 
     assign absorb_ready = (curr_state == ST_ABSORB);
-    assign squeeze_valid = (curr_state == ST_SQUEEZE) && squeeze_more;
+    assign squeeze_valid = (curr_state == ST_SQUEEZE);
     assign squeeze_out = squeeze_data;
     assign squeeze_bytes = keccak_output_bytes(mode_reg);
     assign done = (curr_state == ST_DONE);
