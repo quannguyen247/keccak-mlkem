@@ -1,0 +1,384 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<system name="$${FILENAME}">
+ <component name="$${FILENAME}" displayName="$${FILENAME}" version="1.0" description="" tags="" categories="System" />
+ <parameter name="bonusData">bonusData 
+{
+   element byte_order_rx_0
+   {
+      datum _sortIndex
+      {
+         value = "4";
+         type = "int";
+      }
+   }
+   element byte_order_tx_0
+   {
+      datum _sortIndex
+      {
+         value = "3";
+         type = "int";
+      }
+   }
+   element clock
+   {
+      datum _sortIndex
+      {
+         value = "0";
+         type = "int";
+      }
+   }
+   element jtag_uart_0
+   {
+      datum _sortIndex
+      {
+         value = "1";
+         type = "int";
+      }
+   }
+   element jtag_uart_0.avalon_jtag_slave
+   {
+      datum baseAddress
+      {
+         value = "4192";
+         type = "String";
+      }
+   }
+   element keccak_core_0
+   {
+      datum _sortIndex
+      {
+         value = "2";
+         type = "int";
+      }
+   }
+   element keccak_core_0.csr
+   {
+      datum baseAddress
+      {
+         value = "0";
+         type = "String";
+      }
+   }
+   element keccak_core_0.interrupt
+   {
+      datum _tags
+      {
+         value = "";
+         type = "String";
+      }
+   }
+   element keccak_core_0.stream_in
+   {
+      datum _tags
+      {
+         value = "";
+         type = "String";
+      }
+   }
+   element msgdma_rx_0
+   {
+      datum _sortIndex
+      {
+         value = "7";
+         type = "int";
+      }
+   }
+   element msgdma_rx_0.clock
+   {
+      datum _tags
+      {
+         value = "";
+         type = "String";
+      }
+   }
+   element msgdma_rx_0.csr
+   {
+      datum baseAddress
+      {
+         value = "4096";
+         type = "String";
+      }
+   }
+   element msgdma_rx_0.descriptor_slave
+   {
+      datum baseAddress
+      {
+         value = "4160";
+         type = "String";
+      }
+   }
+   element msgdma_tx_0
+   {
+      datum _sortIndex
+      {
+         value = "6";
+         type = "int";
+      }
+   }
+   element msgdma_tx_0.csr
+   {
+      datum baseAddress
+      {
+         value = "4128";
+         type = "String";
+      }
+   }
+   element msgdma_tx_0.descriptor_slave
+   {
+      datum baseAddress
+      {
+         value = "4176";
+         type = "String";
+      }
+   }
+}
+</parameter>
+ <parameter name="clockCrossingAdapter" value="HANDSHAKE" />
+ <parameter name="device" value="5CSEMA5F31C6" />
+ <parameter name="deviceFamily" value="Cyclone V" />
+ <parameter name="deviceSpeedGrade" value="6" />
+ <parameter name="fabricMode" value="QSYS" />
+ <parameter name="generateLegacySim" value="false" />
+ <parameter name="generationId" value="0" />
+ <parameter name="globalResetBus" value="false" />
+ <parameter name="hdlLanguage" value="VERILOG" />
+ <parameter name="hideFromIPCatalog" value="false" />
+ <parameter name="lockedInterfaceDefinition" value="" />
+ <parameter name="maxAdditionalLatency" value="1" />
+ <parameter name="projectName" value="keccak_altera.qpf" />
+ <parameter name="sopcBorderPoints" value="false" />
+ <parameter name="systemHash" value="0" />
+ <parameter name="testBenchDutName" value="" />
+ <parameter name="timeStamp" value="0" />
+ <parameter name="useTestBenchNamingPattern" value="false" />
+ <instanceScript />
+ <interface name="clk" internal="clock.clk_in" type="clock" dir="end" />
+ <interface name="reset" internal="clock.clk_in_reset" type="reset" dir="end" />
+ <module name="byte_order_rx_0" kind="stream_byte_order_adapter" version="1.0" enabled="1">
+  <parameter name="DATA_WIDTH" value="64" />
+  <parameter name="INPUT_HIGH_FIRST" value="false" />
+ </module>
+ <module name="byte_order_tx_0" kind="stream_byte_order_adapter" version="1.0" enabled="1">
+  <parameter name="DATA_WIDTH" value="64" />
+  <parameter name="INPUT_HIGH_FIRST" value="true" />
+ </module>
+ <module name="clock" kind="clock_source" version="23.1" enabled="1">
+  <parameter name="clockFrequency" value="50000000" />
+  <parameter name="clockFrequencyKnown" value="true" />
+  <parameter name="inputClockFrequency" value="0" />
+  <parameter name="resetSynchronousEdges" value="NONE" />
+ </module>
+ <module name="jtag_uart_0" kind="altera_avalon_jtag_uart" version="23.1" enabled="1">
+  <parameter name="allowMultipleConnections" value="false" />
+  <parameter name="avalonSpec" value="2.0" />
+  <parameter name="clkFreq" value="50000000" />
+  <parameter name="hubInstanceID" value="0" />
+  <parameter name="readBufferDepth" value="64" />
+  <parameter name="readIRQThreshold" value="8" />
+  <parameter name="simInputCharacterStream" value="" />
+  <parameter name="simInteractiveOptions">NO_INTERACTIVE_WINDOWS</parameter>
+  <parameter name="useRegistersForReadBuffer" value="false" />
+  <parameter name="useRegistersForWriteBuffer" value="false" />
+  <parameter name="useRelativePathForSimFile" value="false" />
+  <parameter name="writeBufferDepth" value="64" />
+  <parameter name="writeIRQThreshold" value="8" />
+ </module>
+ <module name="keccak_core_0" kind="keccak_core" version="1.0" enabled="1">
+  <parameter name="AXIS_DATA_WIDTH" value="64" />
+ </module>
+ <module name="msgdma_rx_0" kind="altera_msgdma" version="23.1" enabled="1">
+  <parameter name="BURST_ENABLE" value="1" />
+  <parameter name="BURST_WRAPPING_SUPPORT" value="0" />
+  <parameter name="CHANNEL_ENABLE" value="0" />
+  <parameter name="CHANNEL_WIDTH" value="8" />
+  <parameter name="DATA_FIFO_DEPTH" value="64" />
+  <parameter name="DATA_WIDTH" value="64" />
+  <parameter name="DESCRIPTOR_FIFO_DEPTH" value="128" />
+  <parameter name="ENHANCED_FEATURES" value="0" />
+  <parameter name="ERROR_ENABLE" value="0" />
+  <parameter name="ERROR_WIDTH" value="8" />
+  <parameter name="EXPOSE_ST_PORT" value="0" />
+  <parameter name="FIX_ADDRESS_WIDTH" value="32" />
+  <parameter name="MAX_BURST_COUNT" value="16" />
+  <parameter name="MAX_BYTE" value="67108864" />
+  <parameter name="MAX_STRIDE" value="1" />
+  <parameter name="MODE" value="2" />
+  <parameter name="PACKET_ENABLE" value="1" />
+  <parameter name="PREFETCHER_DATA_WIDTH" value="32" />
+  <parameter name="PREFETCHER_ENABLE" value="0" />
+  <parameter name="PREFETCHER_MAX_READ_BURST_COUNT" value="2" />
+  <parameter name="PREFETCHER_READ_BURST_ENABLE" value="0" />
+  <parameter name="PROGRAMMABLE_BURST_ENABLE" value="0" />
+  <parameter name="RESPONSE_PORT" value="2" />
+  <parameter name="STRIDE_ENABLE" value="0" />
+  <parameter name="TRANSFER_TYPE" value="Unaligned Accesses" />
+  <parameter name="USE_FIX_ADDRESS_WIDTH" value="0" />
+ </module>
+ <module name="msgdma_tx_0" kind="altera_msgdma" version="23.1" enabled="1">
+  <parameter name="BURST_ENABLE" value="1" />
+  <parameter name="BURST_WRAPPING_SUPPORT" value="0" />
+  <parameter name="CHANNEL_ENABLE" value="0" />
+  <parameter name="CHANNEL_WIDTH" value="8" />
+  <parameter name="DATA_FIFO_DEPTH" value="64" />
+  <parameter name="DATA_WIDTH" value="64" />
+  <parameter name="DESCRIPTOR_FIFO_DEPTH" value="128" />
+  <parameter name="ENHANCED_FEATURES" value="0" />
+  <parameter name="ERROR_ENABLE" value="0" />
+  <parameter name="ERROR_WIDTH" value="8" />
+  <parameter name="EXPOSE_ST_PORT" value="0" />
+  <parameter name="FIX_ADDRESS_WIDTH" value="32" />
+  <parameter name="MAX_BURST_COUNT" value="16" />
+  <parameter name="MAX_BYTE" value="67108864" />
+  <parameter name="MAX_STRIDE" value="1" />
+  <parameter name="MODE" value="1" />
+  <parameter name="PACKET_ENABLE" value="1" />
+  <parameter name="PREFETCHER_DATA_WIDTH" value="32" />
+  <parameter name="PREFETCHER_ENABLE" value="0" />
+  <parameter name="PREFETCHER_MAX_READ_BURST_COUNT" value="2" />
+  <parameter name="PREFETCHER_READ_BURST_ENABLE" value="0" />
+  <parameter name="PROGRAMMABLE_BURST_ENABLE" value="0" />
+  <parameter name="RESPONSE_PORT" value="2" />
+  <parameter name="STRIDE_ENABLE" value="0" />
+  <parameter name="TRANSFER_TYPE" value="Unaligned Accesses" />
+  <parameter name="USE_FIX_ADDRESS_WIDTH" value="0" />
+ </module>
+<module name="nios2_qsys_0" kind="altera_nios2_gen2" version="23.1" enabled="1">
+ <parameter name="impl" value="Tiny" />
+ <parameter name="resetSlave" value="onchip_memory.s1" />
+ <parameter name="resetOffset" value="0" />
+ <parameter name="exceptionSlave" value="onchip_memory.s1" />
+ <parameter name="exceptionOffset" value="32" />
+ <parameter name="debug_enabled" value="true" />
+ <parameter name="icache_size" value="0" />
+ <parameter name="dcache_size" value="0" />
+</module>
+<module name="onchip_memory" kind="altera_avalon_onchip_memory2" version="23.1" enabled="1">
+ <parameter name="allowInSystemMemoryContentEditor" value="false" />
+ <parameter name="autoInitializationFileName" value="$${FILENAME}_onchip_memory" />
+ <parameter name="blockType" value="AUTO" />
+ <parameter name="copyInitFile" value="false" />
+ <parameter name="dataWidth" value="32" />
+ <parameter name="dataWidth2" value="32" />
+ <parameter name="dualPort" value="false" />
+ <parameter name="ecc_enabled" value="false" />
+ <parameter name="enPRInitMode" value="false" />
+ <parameter name="enableDiffWidth" value="false" />
+ <parameter name="initMemContent" value="false" />
+ <parameter name="initializationFileName" value="onchip_mem.hex" />
+ <parameter name="instanceID" value="NONE" />
+ <parameter name="memorySize" value="65536" />
+ <parameter name="readDuringWriteMode" value="DONT_CARE" />
+ <parameter name="resetrequest_enabled" value="true" />
+ <parameter name="simAllowMRAMContentsFile" value="false" />
+ <parameter name="simMemInitOnlyFilename" value="0" />
+ <parameter name="singleClockOperation" value="false" />
+ <parameter name="slave1Latency" value="1" />
+ <parameter name="slave2Latency" value="1" />
+ <parameter name="useNonDefaultInitFile" value="false" />
+ <parameter name="useShallowMemBlocks" value="false" />
+ <parameter name="writable" value="true" />
+</module>
+ <connection kind="avalon" version="23.1" start="nios2_qsys_0.data_master" end="jtag_uart_0.avalon_jtag_slave">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x1060" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection kind="avalon" version="23.1" start="nios2_qsys_0.data_master" end="keccak_core_0.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection kind="avalon" version="23.1" start="nios2_qsys_0.data_master" end="msgdma_tx_0.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x1020" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection kind="avalon" version="23.1" start="nios2_qsys_0.data_master" end="msgdma_rx_0.csr">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x1000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection kind="avalon" version="23.1" start="nios2_qsys_0.data_master" end="msgdma_tx_0.descriptor_slave">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x1050" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection kind="avalon" version="23.1" start="nios2_qsys_0.data_master" end="msgdma_rx_0.descriptor_slave">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x1040" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection kind="avalon" version="23.1" start="msgdma_tx_0.mm_read" end="onchip_memory.s1">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x00010000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection kind="avalon" version="23.1" start="msgdma_rx_0.mm_write" end="onchip_memory.s1">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x00010000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection kind="avalon_streaming" version="23.1" start="byte_order_rx_0.out" end="msgdma_rx_0.st_sink" />
+ <connection kind="avalon_streaming" version="23.1" start="byte_order_tx_0.out" end="keccak_core_0.stream_in" />
+ <connection kind="avalon_streaming" version="23.1" start="msgdma_tx_0.st_source" end="byte_order_tx_0.in" />
+ <connection kind="avalon_streaming" version="23.1" start="keccak_core_0.stream_out" end="byte_order_rx_0.in" />
+ <connection kind="clock" version="23.1" start="clock.clk" end="jtag_uart_0.clk" />
+ <connection kind="clock" version="23.1" start="clock.clk" end="keccak_core_0.clock" />
+ <connection kind="clock" version="23.1" start="clock.clk" end="byte_order_tx_0.clock" />
+ <connection kind="clock" version="23.1" start="clock.clk" end="byte_order_rx_0.clock" />
+ <connection kind="clock" version="23.1" start="clock.clk" end="msgdma_tx_0.clock" />
+ <connection kind="clock" version="23.1" start="clock.clk" end="msgdma_rx_0.clock" />
+ <connection kind="interrupt" version="23.1" start="nios2_qsys_0.irq" end="msgdma_tx_0.csr_irq">
+  <parameter name="irqNumber" value="1" />
+ </connection>
+ <connection kind="interrupt" version="23.1" start="nios2_qsys_0.irq" end="msgdma_rx_0.csr_irq">
+  <parameter name="irqNumber" value="2" />
+ </connection>
+ <connection kind="interrupt" version="23.1" start="nios2_qsys_0.irq" end="keccak_core_0.interrupt">
+  <parameter name="irqNumber" value="0" />
+ </connection>
+ <connection kind="interrupt" version="23.1" start="nios2_qsys_0.irq" end="jtag_uart_0.irq">
+  <parameter name="irqNumber" value="3" />
+ </connection>
+ <connection kind="reset" version="23.1" start="clock.clk_reset" end="jtag_uart_0.reset" />
+ <connection kind="reset" version="23.1" start="clock.clk_reset" end="keccak_core_0.reset" />
+ <connection kind="reset" version="23.1" start="clock.clk_reset" end="byte_order_tx_0.reset" />
+ <connection kind="reset" version="23.1" start="clock.clk_reset" end="byte_order_rx_0.reset" />
+ <connection kind="reset" version="23.1" start="clock.clk_reset" end="msgdma_tx_0.reset_n" />
+ <connection kind="reset" version="23.1" start="clock.clk_reset" end="msgdma_rx_0.reset_n" />
+ 
+<connection kind="avalon" version="23.1" start="nios2_qsys_0.instruction_master" end="onchip_memory.s1">
+ <parameter name="arbitrationPriority" value="1" />
+ <parameter name="baseAddress" value="0x00010000" />
+ <parameter name="defaultConnection" value="false" />
+</connection>
+<connection kind="avalon" version="23.1" start="nios2_qsys_0.instruction_master" end="nios2_qsys_0.debug_mem_slave">
+ <parameter name="arbitrationPriority" value="1" />
+ <parameter name="baseAddress" value="0x00020000" />
+ <parameter name="defaultConnection" value="false" />
+</connection>
+<connection kind="avalon" version="23.1" start="nios2_qsys_0.data_master" end="onchip_memory.s1">
+ <parameter name="arbitrationPriority" value="1" />
+ <parameter name="baseAddress" value="0x00010000" />
+ <parameter name="defaultConnection" value="false" />
+</connection>
+<connection kind="avalon" version="23.1" start="nios2_qsys_0.data_master" end="nios2_qsys_0.debug_mem_slave">
+ <parameter name="arbitrationPriority" value="1" />
+ <parameter name="baseAddress" value="0x00020000" />
+ <parameter name="defaultConnection" value="false" />
+</connection>
+<connection kind="clock" version="23.1" start="clock.clk" end="nios2_qsys_0.clk" />
+<connection kind="clock" version="23.1" start="clock.clk" end="onchip_memory.clk1" />
+<connection kind="reset" version="23.1" start="nios2_qsys_0.debug_reset_request" end="nios2_qsys_0.reset" />
+<connection kind="reset" version="23.1" start="clock.clk_reset" end="nios2_qsys_0.reset" />
+<connection kind="reset" version="23.1" start="nios2_qsys_0.debug_reset_request" end="onchip_memory.reset1" />
+<connection kind="reset" version="23.1" start="clock.clk_reset" end="onchip_memory.reset1" />
+<connection kind="reset" version="23.1" start="nios2_qsys_0.debug_reset_request" end="jtag_uart_0.reset" />
+<connection kind="reset" version="23.1" start="nios2_qsys_0.debug_reset_request" end="keccak_core_0.reset" />
+<connection kind="reset" version="23.1" start="nios2_qsys_0.debug_reset_request" end="byte_order_tx_0.reset" />
+<connection kind="reset" version="23.1" start="nios2_qsys_0.debug_reset_request" end="byte_order_rx_0.reset" />
+<connection kind="reset" version="23.1" start="nios2_qsys_0.debug_reset_request" end="msgdma_tx_0.reset_n" />
+<connection kind="reset" version="23.1" start="nios2_qsys_0.debug_reset_request" end="msgdma_rx_0.reset_n" />
+ <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
+ <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="1" />
+</system>
