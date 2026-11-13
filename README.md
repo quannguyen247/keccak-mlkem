@@ -4,8 +4,9 @@ This repository contains synthesizable Verilog RTL for Keccak-f[1600] and the
 four FIPS 202 functions used by ML-KEM: SHAKE128, SHAKE256, SHA3-256 and
 SHA3-512. The core computes one permutation round per clock cycle and keeps a
 single 1600-bit state shared by the permutation and the sponge. Padding is done
-in hardware. An AXI4-Lite and AXI4-Stream wrapper connects the core to an AMD
-AXI DMA on the Kria KV260.
+in hardware. Bus wrappers connect the core either to an AMD AXI DMA on the Kria
+KV260 (AXI4-Lite CSR and AXI4-Stream) or to Altera mSGDMA on the DE1-SoC
+(Avalon-MM CSR and Avalon-ST).
 
 The core is a building block for a later ML-KEM accelerator. It does not
 implement ML-KEM KeyGen, Encaps or Decaps.
@@ -27,23 +28,30 @@ default synthesis and implementation strategies and no debug cores:
 
 The KV260 designs include the Zynq PS, the DMA, interconnect and, in one
 build, a System ILA. Their resource figures belong to a different device and
-context and are listed separately in the [implementation results](Implementation/docs/RESULT.md).
+context and are listed separately in the [implementation results](docs/RESULT.md).
 
 ## Source layout
 
 | Path | Purpose |
 | --- | --- |
-| [`Implementation/rtl/`](Implementation/rtl/) | Core RTL (`modules/`) and shared headers (`utils/`) |
-| [`Implementation/testbench/`](Implementation/testbench/) | Self-checking testbenches for the core and the SoC wrapper |
-| [`Implementation/vector/`](Implementation/vector/) | `keccak_vector.py`, the golden-vector generator shared by both testbenches |
-| [`Implementation/constraint/`](Implementation/constraint/) | 4 ns clock constraint for the standalone build |
-| [`Implementation/project/keccak_top/`](Implementation/project/keccak_top/) | Artix-7 project for `keccak_top_wrapper` |
-| [`Implementation/project/keccak_soc/`](Implementation/project/keccak_soc/) | KV260 block design without debug cores; includes simulation-only AXI protocol checker IPs used by `keccak_soc_tb.v` |
-| [`Implementation/project/keccak_soc_ila/`](Implementation/project/keccak_soc_ila/) | KV260 block design with a System ILA and the same simulation checkers; its XSA feeds the Vitis platform |
-| [`Implementation/project/ip_repo/keccak_core/`](Implementation/project/ip_repo/keccak_core/) | Packaged IP `quannguyen247.org:user:keccak_core:1.0` |
-| [`Implementation/docs/SPEC.md`](Implementation/docs/SPEC.md) | IP technical specification and register map |
-| [`Implementation/docs/RESULT.md`](Implementation/docs/RESULT.md) | Synthesis and implementation results |
-| [`Software/`](Software/) | Vitis 2025.2 workspace: KV260 platform and the `keccak_test` bare-metal app |
+| [`rtl/`](rtl/) | Core RTL (`modules/`) and shared headers (`utils/`) |
+| [`testbench/`](testbench/) | Self-checking testbenches for the core and the SoC wrapper |
+| [`vector/`](vector/) | `keccak_vector.py`, the golden-vector generator shared by both testbenches |
+| [`constraint/`](constraint/) | 4 ns clock constraint for the standalone build |
+| [`project/keccak_top/`](project/keccak_top/) | Xilinx Vivado project (Artix-7) for standalone `keccak_top_wrapper` |
+| [`project/keccak_soc/`](project/keccak_soc/) | Xilinx Vivado KV260 block design without debug cores; includes simulation-only AXI protocol checker IPs used by `keccak_soc_tb.v` |
+| [`project/keccak_soc_ila/`](project/keccak_soc_ila/) | Xilinx Vivado KV260 block design with a System ILA and the same simulation checkers; its XSA feeds the Vitis platform |
+| [`project/ip_repo/keccak_core/`](project/ip_repo/keccak_core/) | Packaged Xilinx IP `quannguyen247.org:user:keccak_core:1.0` |
+| [`project/software/`](project/software/) | **Xilinx software** — AMD Vitis 2025.2 workspace (`keccak_platform` and the `keccak_test` bare-metal application for KV260) |
+| [`project/keccak_top_altera/`](project/keccak_top_altera/) | Quartus standalone Avalon Keccak IP project, using shared RTL with no debug cores |
+| [`project/keccak_soc_altera/`](project/keccak_soc_altera/) | Intel/Altera Quartus Prime 23.1 & Platform Designer (`system.qsys`) Cyclone V SoC project |
+| [`project/keccak_soc_altera/software/`](project/keccak_soc_altera/software/) | **Altera software** — Nios II Software Build Tools for Eclipse projects (`keccak_soc_altera` application and `keccak_soc_altera_bsp`) |
+| [`docs/SPEC.md`](docs/SPEC.md) | IP technical specification and CSR map |
+| [`docs/RESULT.md`](docs/RESULT.md) | Synthesis and implementation results |
+
+> **Software directories note:**
+> - [`project/software/`](project/software/) is the **Xilinx** software workspace (AMD Vitis 2025.2 targeting Zynq UltraScale+ on Kria KV260).
+> - [`project/keccak_soc_altera/software/`](project/keccak_soc_altera/software/) is the **Altera** software workspace (Nios II Software Build Tools for Eclipse targeting the Cyclone V Platform Designer system).
 
 | RTL module | Role |
 | --- | --- |
@@ -51,53 +59,71 @@ context and are listed separately in the [implementation results](Implementation
 | `keccak_sponge.v` | Absorb and squeeze FSM for the four modes |
 | `keccak_pad_block.v` | Combinational FIPS 202 padding |
 | `keccak_top.v` | Native core: padding and sponge |
-| `keccak_top_wrapper.v` | AXI4-Lite registers and AXI4-Stream ports for DMA use |
+| `keccak_top_wrapper.v` | AXI4-Lite CSR and AXI4-Stream ports for Xilinx AXI DMA |
+| `keccak_top_wrapper_avalon.v` | Avalon-MM CSR and Avalon-ST ports for Altera mSGDMA |
 
-Vivado run directories and Vitis build output are not tracked. Rebuild them
-after changing RTL, constraints or software.
-The SoC projects include their block designs, IP configurations and checker
-simulation manifests, so their XPR files can be opened from a fresh clone.
-Vivado 2025.2.1 regenerates the remaining IP outputs locally on first use;
-this requires the KV260 part, board files and the standard Vivado IP catalog.
-When checker outputs are regenerated, their tracked manifests may change their
-generation timestamps.
+Generated synthesis/implementation run directories, Quartus databases and
+software build outputs are not tracked. Rebuild them after changing RTL,
+constraints or software.
+The Vivado SoC projects include their block designs, IP configurations and
+checker simulation manifests, and the Quartus project includes `system.qsys`
+and `system.sopcinfo`, so all project files can be opened directly from a fresh
+clone. Vivado 2025.2.1 and Quartus Prime 23.1 regenerate IP outputs locally on
+first compile.
 
 ## Test and build
 
 The repository includes 150 test vectors, so both testbenches can run after a
 fresh clone. The testbenches find the vector files relative to their own path.
-To regenerate the default set or choose a different number of cases:
+To regenerate the default set or choose a different number of cases from the
+repository root:
 
 ```sh
-cd Implementation
 python3 vector/keccak_vector.py 150
 ```
 
-The core testbench runs in Icarus Verilog from the `Implementation` directory:
+The core testbench runs in Icarus Verilog from the repository root:
 
 ```sh
-iverilog -g2012 -I rtl/utils -o keccak_top.vvp testbench/keccak_top_tb.v rtl/modules/*.v
+iverilog -g2012 -I rtl/utils -o keccak_top.vvp testbench/keccak_top_tb.v rtl/modules/keccak_pad_block.v rtl/modules/keccak_permutation.v rtl/modules/keccak_sponge.v rtl/modules/keccak_top.v
 vvp -n keccak_top.vvp
 ```
 
 The SoC testbench instantiates AMD AXI and AXI4-Stream protocol checker IPs on
 the wrapper ports, so it runs in the Vivado simulator: open
-`Implementation/project/keccak_soc/keccak_soc.xpr` and run behavioral
-simulation with `keccak_soc_tb` as the top. A protocol violation appears as an
-`ERROR` line in the simulator log. Setting `FAULT_CASE` in the testbench to a
-case index injects a deliberate `TDATA` change under backpressure to show that
-the checker fires; the default `-1` turns it off.
+`project/keccak_soc/keccak_soc.xpr` and run behavioral simulation with
+`keccak_soc_tb` as the top. A protocol violation appears as an `ERROR` line in
+the simulator log. Setting `FAULT_CASE` in the testbench to a case index injects
+a deliberate `TDATA` change under backpressure to show that the checker fires;
+the default `-1` turns it off.
 
 Both runs print a pass count and write a per-case log to
 `testbench/keccak_top_result.log` and `testbench/keccak_soc_result.log`. The
 current RTL passes 150/150 cases in each, with no checker errors.
 
-For implementation, open `Implementation/project/keccak_top/keccak_top.xpr` in
-Vivado 2025.2.1 and run synthesis and implementation. For the board, build
-`keccak_soc_ila`, export the hardware with the bitstream, update the Vitis
-platform in `Software/keccak_platform`, and run `keccak_test`. Set `TEST_MODE`
-in `Software/keccak_test/src/main.c` to choose the function. The program
-hashes `"abc"` through the DMA and prints `PASS` or `FAIL` over UART.
+For Xilinx standalone implementation, open `project/keccak_top/keccak_top.xpr`
+in Vivado 2025.2.1 and run synthesis and implementation. For the KV260 board,
+build `project/keccak_soc_ila/keccak_soc_ila.xpr`, export hardware with the
+bitstream, open `project/software` in Vitis 2025.2.1, update `keccak_platform`
+if needed, and build/run `keccak_test` (`TEST_MODE` in
+`project/software/keccak_test/src/main.c` selects the function).
+
+For Altera, use Quartus Prime Lite 23.1std.1 with Cyclone V device support.
+Open `project/keccak_top_altera/keccak_top_altera.qpf` for the standalone IP or
+`project/keccak_soc_altera/keccak_soc_altera.qpf` for the DE1-SoC system.
+Command-line Analysis & Synthesis from a fresh clone:
+
+```sh
+(cd project/keccak_top_altera && quartus_map --read_settings_files=on --write_settings_files=off keccak_top_altera -c keccak_top_altera)
+(cd project/keccak_soc_altera && quartus_map --read_settings_files=on --write_settings_files=off keccak_soc_altera -c keccak_soc_altera)
+```
+
+Quartus generates the SoC Qsys HDL locally. The retained Signal Tap source is
+`project/keccak_soc_altera/debug/keccak_soc_altera.stp`. See the
+[Altera build and source audit](docs/ALTERA_BUILD.md) for required inputs,
+generated-file exclusions and verification scope. Import `keccak_soc_altera_bsp`
+and `keccak_soc_altera` from `project/keccak_soc_altera/software/` into Nios II
+Software Build Tools for Eclipse when building the optional firmware.
 
 Simulation checks the core against Python `hashlib` with directed boundary
 cases and random messages. It does not cover the wrapper error paths, and it
@@ -106,11 +132,11 @@ have not been measured.
 
 ## Documentation
 
-- [IP technical specification](Implementation/docs/SPEC.md): interfaces,
-  microarchitecture, register map, error codes, KV260 integration, performance
-  and verification.
-- [Implementation results](Implementation/docs/RESULT.md): standalone and
-  KV260 resource and timing results.
+- [IP technical specification](docs/SPEC.md): interfaces, microarchitecture,
+  CSR map, error codes, KV260 and DE1-SoC integration, performance and
+  verification.
+- [Implementation results](docs/RESULT.md): standalone and KV260 resource and
+  timing results.
 
 ## References
 

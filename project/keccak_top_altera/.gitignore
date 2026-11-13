@@ -1,0 +1,11 @@
+/db/
+/incremental_db/
+/output_files/
+/*.log
+/*.qws
+/*.bak
+/*.rpt
+/*.smsg
+/*.summary
+/*.done
+/c5_pin_model_dump.txt

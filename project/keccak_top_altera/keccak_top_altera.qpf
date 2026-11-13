@@ -1,0 +1,2 @@
+QUARTUS_VERSION = "23.1std.1"
+PROJECT_REVISION = "keccak_top_altera"

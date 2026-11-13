@@ -1,0 +1,29 @@
+set_global_assignment -name FAMILY "Cyclone V"
+set_global_assignment -name DEVICE 5CSEMA5F31C6
+set_global_assignment -name TOP_LEVEL_ENTITY keccak_top_wrapper_avalon
+set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
+set_global_assignment -name SEARCH_PATH ../../rtl/utils
+set_global_assignment -name SDC_FILE keccak_top_altera.sdc
+set_global_assignment -name NUM_PARALLEL_PROCESSORS 4
+set_global_assignment -name OPTIMIZE_MULTI_CORNER_TIMING ON
+set_global_assignment -name ENABLE_SIGNALTAP OFF
+set_global_assignment -name FLOW_ENABLE_POWER_ANALYZER ON
+set_global_assignment -name POWER_DEFAULT_TOGGLE_RATE 12.5%
+set_global_assignment -name POWER_DEFAULT_INPUT_IO_TOGGLE_RATE 12.5%
+set_global_assignment -name POWER_USE_INPUT_FILES OFF
+set_global_assignment -name MIN_CORE_JUNCTION_TEMP 0
+set_global_assignment -name MAX_CORE_JUNCTION_TEMP 85
+set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
+set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
+set_global_assignment -name RESERVE_ALL_UNUSED_PINS "AS INPUT TRI-STATED"
+set_global_assignment -name STRATIX_DEVICE_IO_STANDARD "3.3-V LVTTL"
+set_global_assignment -name VERILOG_FILE ../../rtl/modules/keccak_top_wrapper_avalon.v
+set_global_assignment -name VERILOG_FILE ../../rtl/modules/keccak_top.v
+set_global_assignment -name VERILOG_FILE ../../rtl/modules/keccak_sponge.v
+set_global_assignment -name VERILOG_FILE ../../rtl/modules/keccak_permutation.v
+set_global_assignment -name VERILOG_FILE ../../rtl/modules/keccak_pad_block.v
+
+set_global_assignment -name LAST_QUARTUS_VERSION "23.1std.1 Lite Edition"
+set_global_assignment -name RESERVE_ALL_UNUSED_PINS_NO_OUTPUT_GND "AS INPUT TRI-STATED"
+set_location_assignment PIN_AF14 -to aclk
+set_global_assignment -name OPTIMIZE_HOLD_TIMING ALL_PATHS

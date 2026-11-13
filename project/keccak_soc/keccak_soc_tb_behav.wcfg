@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="keccak_soc_tb_behav.wdb" id="1">
+         <top_modules>
+            <top_module name="glbl" />
+            <top_module name="keccak_soc_tb" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="2,764.143 ns"></ZoomStartTime>
+      <ZoomEndTime time="2,822.544 ns"></ZoomEndTime>
+      <Cursor1Time time="2,785.000 ns"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="346"></NameColumnWidth>
+      <ValueColumnWidth column_width="88"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="6" />
+   <wave_markers>
+      <marker label="" time="212500" />
+      <marker label="" time="367500" />
+      <marker label="" time="242500" />
+      <marker label="" time="2800000" />
+      <marker label="" time="2780000" />
+   </wave_markers>
+   <wvobject type="logic" fp_name="/keccak_soc_tb/aclk">
+      <obj_property name="ElementShortName">aclk</obj_property>
+      <obj_property name="ObjectShortName">aclk</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/keccak_soc_tb/aresetn">
+      <obj_property name="ElementShortName">aresetn</obj_property>
+      <obj_property name="ObjectShortName">aresetn</obj_property>
+   </wvobject>
+   <wvobject type="group" fp_name="group295">
+      <obj_property name="label">AXI4-Lite Slave</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
+      <wvobject type="array" fp_name="/keccak_soc_tb/awaddr">
+         <obj_property name="ElementShortName">awaddr[11:0]</obj_property>
+         <obj_property name="ObjectShortName">awaddr[11:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/keccak_soc_tb/awvalid">
+         <obj_property name="ElementShortName">awvalid</obj_property>
+         <obj_property name="ObjectShortName">awvalid</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/keccak_soc_tb/awready">
+         <obj_property name="ElementShortName">awready</obj_property>
+         <obj_property name="ObjectShortName">awready</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/keccak_soc_tb/wdata">
+         <obj_property name="ElementShortName">wdata[31:0]</obj_property>
+         <obj_property name="ObjectShortName">wdata[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/keccak_soc_tb/wvalid">
+         <obj_property name="ElementShortName">wvalid</obj_property>
+         <obj_property name="ObjectShortName">wvalid</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/keccak_soc_tb/wready">
+         <obj_property name="ElementShortName">wready</obj_property>
+         <obj_property name="ObjectShortName">wready</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/keccak_soc_tb/bvalid">
+         <obj_property name="ElementShortName">bvalid</obj_property>
+         <obj_property name="ObjectShortName">bvalid</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/keccak_soc_tb/bresp">
+         <obj_property name="ElementShortName">bresp[1:0]</obj_property>
+         <obj_property name="ObjectShortName">bresp[1:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/keccak_soc_tb/bready">
+         <obj_property name="ElementShortName">bready</obj_property>
+         <obj_property name="ObjectShortName">bready</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/keccak_soc_tb/arvalid">
+         <obj_property name="ElementShortName">arvalid</obj_property>
+         <obj_property name="ObjectShortName">arvalid</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/keccak_soc_tb/arready">
+         <obj_property name="ElementShortName">arready</obj_property>
+         <obj_property name="ObjectShortName">arready</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/keccak_soc_tb/araddr">
+         <obj_property name="ElementShortName">araddr[11:0]</obj_property>
+         <obj_property name="ObjectShortName">araddr[11:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/keccak_soc_tb/rvalid">
+         <obj_property name="ElementShortName">rvalid</obj_property>
+         <obj_property name="ObjectShortName">rvalid</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/keccak_soc_tb/rdata">
+         <obj_property name="ElementShortName">rdata[31:0]</obj_property>
+         <obj_property name="ObjectShortName">rdata[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/keccak_soc_tb/rready">
+         <obj_property name="ElementShortName">rready</obj_property>
+         <obj_property name="ObjectShortName">rready</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/keccak_soc_tb/rresp">
+         <obj_property name="ElementShortName">rresp[1:0]</obj_property>
+         <obj_property name="ObjectShortName">rresp[1:0]</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject type="group" fp_name="group293">
+      <obj_property name="label">AXI4-Stream Slave</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
+      <wvobject type="logic" fp_name="/keccak_soc_tb/s_tvalid">
+         <obj_property name="ElementShortName">s_tvalid</obj_property>
+         <obj_property name="ObjectShortName">s_tvalid</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/keccak_soc_tb/s_tready">
+         <obj_property name="ElementShortName">s_tready</obj_property>
+         <obj_property name="ObjectShortName">s_tready</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/keccak_soc_tb/s_tkeep">
+         <obj_property name="ElementShortName">s_tkeep[7:0]</obj_property>
+         <obj_property name="ObjectShortName">s_tkeep[7:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/keccak_soc_tb/s_tdata">
+         <obj_property name="ElementShortName">s_tdata[63:0]</obj_property>
+         <obj_property name="ObjectShortName">s_tdata[63:0]</obj_property>
+         <obj_property name="Radix">BINARYRADIX</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject type="group" fp_name="group294">
+      <obj_property name="label">AXI4-Stream Master</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
+      <wvobject type="logic" fp_name="/keccak_soc_tb/m_tvalid">
+         <obj_property name="ElementShortName">m_tvalid</obj_property>
+         <obj_property name="ObjectShortName">m_tvalid</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/keccak_soc_tb/m_tready">
+         <obj_property name="ElementShortName">m_tready</obj_property>
+         <obj_property name="ObjectShortName">m_tready</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/keccak_soc_tb/m_tdata">
+         <obj_property name="ElementShortName">m_tdata[63:0]</obj_property>
+         <obj_property name="ObjectShortName">m_tdata[63:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/keccak_soc_tb/m_tkeep">
+         <obj_property name="ElementShortName">m_tkeep[7:0]</obj_property>
+         <obj_property name="ObjectShortName">m_tkeep[7:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/keccak_soc_tb/m_tlast">
+         <obj_property name="ElementShortName">m_tlast</obj_property>
+         <obj_property name="ObjectShortName">m_tlast</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject type="array" fp_name="/keccak_soc_tb/case_idx">
+      <obj_property name="ElementShortName">case_idx[31:0]</obj_property>
+      <obj_property name="ObjectShortName">case_idx[31:0]</obj_property>
+      <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+   </wvobject>
+</wave_config>
